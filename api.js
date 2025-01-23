@@ -1,6 +1,6 @@
 import { Make_Query } from "./databaseConnection.js";
 import express, { json, request, response } from 'express';
-import { Socket_Connection } from "./SocketIO.js";
+import { Socket_Connection } from "./socketio/socketIO.js";
 import cors from 'cors'
 import multer from "multer";
 import fs from 'fs'

@@ -1,4 +1,4 @@
-import { Make_Query } from "./databaseConnection";
+import { Make_Query } from "../database/databaseConnection.js";
 
 // Handle Delete Order in Status
 async function checkAndDeleteExpiredOrders(){

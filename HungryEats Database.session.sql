@@ -1,50 +1,36 @@
-SELECT * FROM Store_Drink
-SELECT * FROM Drink
-SELECT * FROM Stores
-SELECT * FROM Store_Drink
-SELECT * FROM orders
+INSERT INTO Discounts (User_id, Discount_code, Discount_type, Discount_value, Purchase_count )
+            VALUES(
+                1,
+                'SOTA10',
+                'percentage',
+                10,
+                10
+            )
 
-DESCRIBE orders
+SELECT * FROM Discounts
+DELETE FROM Discounts WHERE User_id = 5
+
+CREATE TABLE Discoints VALUES(
+    
+)
+SELECT User_id FROM Users WHERE Email = ${Email}
+SELECT * FROM Purchase_log
+SELECT * FROM Discounts
+SELECT * from Stores
 DELETE FROM Orders WHERE Store_id = 1
-ALTER TABLE Orders
-MODIFY COLUMN Pickup_time VARCHAR(255);
+SELECT EXISTS (SELECT 1 FROM Users WHERE User_id = 12 AND Username = "minhlu142");
 
-SELECT * FROM Drink INNER JOIN Store_Drink
-ON Drink.Drink_id = Store_Drink.Drink_id
-WHERE Store_Drink.Store_id = 2
-
-
-SELECT Stores.Store_id
-FROM Food
-INNER JOIN Menu ON Food.Menu_id = Menu.Menu_id
-INNER JOIN Stores ON Menu.Store_id = Stores.Store_id
-WHERE Food.Food_id = 2;
-
-
-DELETE FROM orders WHERE User_id = 12
-
-ALTER TABLE Orders 
-CHANGE COLUMN Food_id Food CHAR(255);
-
-DROP TABLE Orders;
-
-Select * from orders
-DROP FOREIGN KEY order_status_ibfk_1;
-
-ALTER TABLE order_status
-ADD CONSTRAINT fk_user_id
-FOREIGN KEY (User_id) REFERENCES Users(User_id)
-ON DELETE CASCADE
-ON UPDATE CASCADE;
-
-
-INSERT INTO Orders (Store_id, User_id, Food_item, Drink_item, Total_price, Pickup_time, Order_number, Order_status)
-                    VALUES(1, 2, '[{ss:"jsa"}]', 'hashs', 1111, 'hskjuh', 'jaskj', 'Waitting')
-                    
-SELECT * FROM Stores INNER JOIN Stores.User_id = Users.User_id WHERE Store_id = 1
 
 SELECT * 
-FROM Stores
-INNER JOIN Users ON Stores.User_id = Users.User_id
-WHERE Stores.Store_id = 1;
+    FROM Discounts 
+    INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id 
+    WHERE Discounts.Store_id = 1
 
+ALTER TABLE Purchase_log ADD COLUMN Type VARCHAR(255) NOT NULL
+
+SELECT Stores.Store_id, Stores.Store_name, Stores.Address, Stores.Phone_number, Menu.Menu_description, Menu.Menu_name , Menu.Menu_image, Menu.Menu_id
+                FROM Stores INNER JOIN Menu
+                ON Stores.Store_id = Menu.Store_id  
+                WHERE Stores.Store_id = 1 AND Stores.Store_name = ''
+
+SELECT * FROM Menu

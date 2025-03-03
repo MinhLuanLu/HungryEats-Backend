@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import http, { get } from 'http';
+import log from 'minhluanlu-color-log'
 import config from '../config.js';
 import { Make_Query } from '../database/databaseConnection.js';
 import UserSocketHandler from '../userManager/socketController/index.js'; //User Manager
@@ -99,7 +100,7 @@ export function socketConnection(api_express) {
 
     const PORT = config.SOCKET_PORT;
     server.listen(PORT,'0.0.0.0',
-    () => console.log(`Connected to SocketIo Server running On http://localhost:${PORT}`))
+    () => log.info(`Connected to SocketIo Server running On http://localhost:${PORT}`))
 
 }
 

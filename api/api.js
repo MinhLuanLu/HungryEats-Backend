@@ -3,6 +3,7 @@ import cors from 'cors';
 import config from '../config.js';
 import multer from "multer";
 import fs from 'fs';
+import log from 'minhluanlu-color-log'
 
 import sharedRoutes from '../routers/sharedRoutes/sharedRoutes.js'
 import userRoutes from '../routers/userRoutes/userRoutes.js';
@@ -35,7 +36,7 @@ async function API() {
     api_express.use(cors())
     api_express.listen(
         PORT, '0.0.0.0',
-        () => console.log(`Connected to API Server running On http://localhost:${PORT}`)
+        () => log.info(`Connected to API Server running On http://localhost:${PORT}`)
     )
 
     socketConnection(api_express) //// Run the SocketIO as Port:3001

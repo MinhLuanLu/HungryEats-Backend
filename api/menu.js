@@ -1,4 +1,5 @@
 import { Make_Query } from "../database/databaseConnection.js";
+import log from 'minhluanlu-color-log'
 
 async function Menu(request, response) {
     try{
@@ -8,7 +9,8 @@ async function Menu(request, response) {
             Store_id
         } = request.body;
 
-        console.info(`The user selected ${Store_name} and requested a restaurant menu.`)
+        log.info({message: `The user selected ${Store_name} and requested a restaurant menu.`})
+        
         if(Store_name && User_id){
             const retrievedMenu = await Make_Query
             (
@@ -18,7 +20,10 @@ async function Menu(request, response) {
                 WHERE Stores.User_id =${User_id} OR Stores.Store_id = '${Store_name}';`
             );
 
-            console.log(retrievedMenu)
+            log.debug({
+                message: `Get menu from store ${Store_name} successfully..`, 
+                menu: retrievedMenu
+            })
 
             response.status(200).send({
                 success: true,

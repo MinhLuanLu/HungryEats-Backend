@@ -106,9 +106,7 @@ async function ApplyDiscountCode(request, response) {
             Store_id,
             Discount_code
         } = request.body;
-
         const get_store_discount_count = await Make_Query(`SELECT * FROM Discounts INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id WHERE Discounts.Store_id =  ${Store_id}`);
-        
         for(const item of get_store_discount_count){
             const store_discount_count = item?.Purchase_count;
             const store_discount_code = item?.Discount_code;
@@ -125,6 +123,7 @@ async function ApplyDiscountCode(request, response) {
                     message: "No discount has been set!",
                     data: []
                 });
+                break
             }
             else{
 
@@ -133,7 +132,7 @@ async function ApplyDiscountCode(request, response) {
                 const [check_user_discount_count] = await Make_Query(`SELECT Purchase_count FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
                 const user_purchase_count = check_user_discount_count?.Purchase_count;
                 
-                if(store_discount_count === user_purchase_count){
+                if(user_purchase_count >= store_discount_count){
                     if(Discount_code == store_discount_code){
                         log.info({
                             success: true,
@@ -147,17 +146,44 @@ async function ApplyDiscountCode(request, response) {
                             data: item
                         })
                         break
+                    }else{
+                        log.error(`Discount code doesn't match`)
+                        response.json({
+                            success:false,
+                            message: `Discount code doesn't match`,
+                            data: Discount_code
+                        })
+                        return
                     }
+                }
+                else{
+                    console.log({
+                        message: "User purchase count doesn't match to store discount count.",
+                        data:  `Store discount count: ${store_discount_count} => User purchase count: ${user_purchase_count}`
+                    });
+                    response.json({
+                        success: false,
+                        message: "User purchase count dosen't match to store discount count.",
+                        data: `Store discount count: ${store_discount_count} => User purchase count: ${user_purchase_count}`
+                    })
+                    return
                 }
             }
         }
+        response.json({
+            success:false,
+            message: `Discount code doesn't match`,
+            data: Discount_code
+        })
     }   
-    catch{
+    catch(error){
         log.error('Failed to apply discount code');
-        response.status(400).json({
+        response.json({
             success: false,
             message: 'Failed to apply discount code',
+            data: error
         })
+        return
     }
 }
 

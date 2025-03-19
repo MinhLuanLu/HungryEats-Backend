@@ -1,4 +1,5 @@
 import { Make_Query } from "../database/databaseConnection.js";
+import log from 'minhluanlu-color-log'
 
 async function Login(request, response) {
     try{
@@ -17,6 +18,7 @@ async function Login(request, response) {
                 if (Password == get_password){
                     if(get_user_role == "Seller"){
                         const get_seller_info = await Make_Query(`SELECT * FROM Users INNER JOIN Stores ON Users.User_id =  Stores.User_id WHERE Email = '${Email}'`);
+                        log.debug(get_seller_info)
                         response.status(200).send({
                             success: true,
                             message: "Login Successfully..",
@@ -29,7 +31,8 @@ async function Login(request, response) {
                         }
                     }
                     if(get_user_role == "User"){
-                        const get_user_info = await Make_Query(`SELECT * FROM Users WHERE Email = '${Email}'`)
+                        const get_user_info = await Make_Query(`SELECT * FROM Users WHERE Email = '${Email}'`);
+                        log.debug(get_user_info)
                         response.status(200).send({
                             success: true,
                             message: "Login Successfully..",
@@ -38,6 +41,7 @@ async function Login(request, response) {
                     }
                 }
                 else{
+                    log.debug("Password incorrect!")
                     response.status(404).send({
                         success: false,
                         message: "Password incorrect!"
@@ -45,6 +49,7 @@ async function Login(request, response) {
                 }
             }
             else{
+                log.debug("Email doesn't exits in system..")
                 response.status(404).send({
                     success: false,
                     message: "Email doesn't exits in system..",
@@ -54,6 +59,7 @@ async function Login(request, response) {
         }
     }
     catch(error){
+        log.error(error)
         return{
             success: false,
             message: error

@@ -1,5 +1,5 @@
 import { Make_Query } from "../database/databaseConnection.js";
-
+import log from 'minhluanlu-color-log'
 async function FoodList(request, response){
     try{
         const {
@@ -16,6 +16,7 @@ async function FoodList(request, response){
                 message: `retrieved food in Menu ${Menu_name} successfully.`,
                 data: retrievedFood
             });
+            log.info({message: `retrieved food in Menu ${Menu_name} successfully.`})
             return{
                 success: true,
                 message: `retrieved food in Menu ${Menu_name} successfully.`,
@@ -36,7 +37,7 @@ async function FoodList(request, response){
                 }
             }
 
-            console.info("Food list retrieved successfully.")
+            console.info({message: `retrieved all food in ${Store_name} successfully.`})
             response.status(200).send({
                 success: true,
                 message: `retrieved all food in ${Store_name} successfully.`,

@@ -33,4 +33,22 @@ SELECT Stores.Store_id, Stores.Store_name, Stores.Address, Stores.Phone_number, 
                 ON Stores.Store_id = Menu.Store_id  
                 WHERE Stores.Store_id = 1 AND Stores.Store_name = ''
 
-SELECT * FROM Menu
+SELECT * FROM Socketio
+
+DESCRIBE Orders
+SELECT * FROM Orders WHERE Order_number = d7561e24-d7a5-4924-96a2-ab957d639063
+
+DELETE FROM Orders WHERE Store_id = 1
+
+ALTER TABLE Orders MODIFY COLUMN Food_item JSON;
+ALTER TABLE Orders MODIFY COLUMN Drink_item JSON;
+
+
+INSERT INTO Orders (Store_id, User_id, Food_item, Drink_item, Total_price, Pickup_time, Order_number, Order_status)
+            VALUES
+            (
+                1, 12,
+                "JSON.stringify(Food_item)" , "JSON.stringify(Food_item)",
+                120 , "none",
+                "888888" , "${orderStatus.pending}"
+            )

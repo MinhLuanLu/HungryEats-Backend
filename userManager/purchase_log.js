@@ -177,7 +177,7 @@ async function ApplyDiscountCode(request, response) {
         })
     }   
     catch(error){
-        log.error('Failed to apply discount code');
+        log.err('Failed to apply discount code');
         response.json({
             success: false,
             message: 'Failed to apply discount code',
@@ -187,4 +187,47 @@ async function ApplyDiscountCode(request, response) {
     }
 }
 
-export { CreatePurchaseLog, Purchase_Log_Check, ApplyDiscountCode}
+
+
+async function updatePurchaseLog(User, Store) {
+
+    const User_id = User?.User_id;
+    const Store_id = Store?.Store_id;
+
+    const [checkPurchaseLog] = await Make_Query(`
+        SELECT * FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id}    
+    `);
+    if(!checkPurchaseLog){
+        log.debug({message: "No Purchase log exist."})
+        log.info("Create new Purchase log");
+        const createPurchaseLog = await Make_Query(`
+            INSERT INTO Purchase_log (User_id, Store_id)
+            VALUES(
+                ${User_id}, ${Store_id}
+            )
+        `)
+
+        return []
+    };
+    log.debug("log exist already, update it.")
+    const Purchase_count = checkPurchaseLog.Purchase_count;
+
+    const updatePurchaseLog = await Make_Query(`
+        UPDATE Purchase_log
+        SET Purchase_count = ${Purchase_count + 1}
+        WHERE User_id = ${User_id} AND Store_id = ${Store_id};
+    `)
+    if(!updatePurchaseLog){
+        log.warn({message: "Failed to update purchase log"})
+        return []
+    }
+
+    log.info('Update purchase log successfully.');
+    return [{
+        success: true, 
+        message: 'Update purchase log successfully.'
+    }]
+    
+}
+
+export { CreatePurchaseLog, Purchase_Log_Check, ApplyDiscountCode, updatePurchaseLog}

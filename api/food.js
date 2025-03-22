@@ -1,5 +1,6 @@
 import { Make_Query } from "../database/databaseConnection.js";
-import log from 'minhluanlu-color-log'
+import log from 'minhluanlu-color-log';
+
 async function FoodList(request, response){
     try{
         const {
@@ -54,6 +55,49 @@ async function FoodList(request, response){
             success: false,
             message: error
         }
+    }
+}
+
+export async function updateFoodQuantity(foods){
+    let success = false;
+    let Food = [];
+    try{
+        for(const food of foods ){
+            const id = food?.Food_id;
+            const orderFood_quantity = food?.Food_quantity;
+
+            const [getFood] = await Make_Query(`
+                SELECT * FROM Food WHERE Food_id = ${id}    
+            `)
+            if(!getFood){
+                log.warn({message: 'Failed to update food quantity'})
+            }else if(getFood){
+                log.debug({message: 'update food quantity'})
+
+                const newQuantity = getFood.Quantity - food.Food_quantity
+                const update = await Make_Query(`
+                    UPDATE Food
+                    SET Quantity = ${newQuantity}
+                    WHERE Food_id = ${id}
+                `)
+                if(!update){
+                    log.debug({message: 'Failed to update food quantity'})
+                }else{
+                    log.info('update food quantity successfully.');
+
+                    success = true;
+                    Food.push(getFood)
+                }
+
+            }
+        }
+
+        if(success){
+            return "update food quantity successfully."
+        }
+        return []
+    }catch(error){
+
     }
 }
 

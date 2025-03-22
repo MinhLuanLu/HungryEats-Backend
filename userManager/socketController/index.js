@@ -1,11 +1,12 @@
 import { Make_Query } from "../../database/databaseConnection.js";
-import orderHandler from "./orderHandler.js";
+import newOrderHandler from "./orderHandler.js";
+import { socketConfig } from "../../config.js";
 
 
 async function UserSocketHandler(socket, io) {
     // =================== Handle sending order to Store and sender back to buyer ================= //
-    socket.on('processOrder',async (order)=>{
-        orderHandler(order, socket, io)
+    socket.on(socketConfig.processOrder ,async (order)=>{
+        newOrderHandler(order, socket, io)
     });
 
     // ========= Request the Store status when user click on the marker, Handle update store Status on socketio check if store is open/close so the store description will show up or not ======== //

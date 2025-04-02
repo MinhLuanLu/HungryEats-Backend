@@ -20,7 +20,10 @@ SELECT * from Stores
 DELETE FROM Orders WHERE Store_id = 1
 SELECT EXISTS (SELECT 1 FROM Users WHERE User_id = 12 AND Username = "minhlu142");
 
+SELECT * FROM Stores
+SELECT Socket_id FROM Socketio WHERE User_id = 12
 
+UPDATE Stores SET Status = '1' WHERE Store_id = 1
 SELECT * 
     FROM Discounts 
     INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id 
@@ -33,7 +36,9 @@ SELECT Stores.Store_id, Stores.Store_name, Stores.Address, Stores.Phone_number, 
                 ON Stores.Store_id = Menu.Store_id  
                 WHERE Stores.Store_id = 1 AND Stores.Store_name = ''
 
-SELECT * FROM Socketio
+SELECT * FROM purchase_log
+
+SHOW TABLES
 
 DESCRIBE Orders
 SELECT * FROM Orders WHERE Order_number = d7561e24-d7a5-4924-96a2-ab957d639063

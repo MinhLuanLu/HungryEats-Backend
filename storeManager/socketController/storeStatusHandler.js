@@ -1,18 +1,34 @@
 import { Make_Query } from "../../database/databaseConnection.js"
+import { socketConfig } from "../../config.js";
+import log from "minhluanlu-color-log";
 
 //  function to update whether a store is open or closed //
 async function StoreStatusHandler(data, socket ,io){
-    try{
-        const User_id = data.User_id
-        const update_store_status = await Make_Query(`UPDATE Stores SET Status = 0 WHERE User_id = ${Number(User_id)}`)
-        const [get_store_status] = await Make_Query(`SELECT Status, Store_name FROM Stores WHERE User_id = ${Number(User_id)}`)
-        
-        const get_all_store = await Make_Query(`SELECT * FROM Stores`)
+    const store = data.Store;
+    const state = data.State;
+    let status;
 
-        socket.emit('update_Store_status', get_store_status)
-        //send  a list of update stores status to all user
-        io.emit('updateStoreStatus', get_all_store)
-        console.info(`${get_store_status?.Store_name} is close..`);
+    if(state){
+        status = '1'
+    }else{
+        status = '0'
+    }
+    console.log(status)
+    try{
+        await Make_Query(`UPDATE Stores SET Status = '${status}' WHERE Store_id = ${store.Store_id}`)
+        
+        const get_all_store = await Make_Query(`SELECT * FROM Stores`);
+        
+        // send  a list of update stores status to all user
+        io.emit(socketConfig.updateStoreState, get_all_store);
+
+        log.debug({
+            message: "Update store state successfully.",
+            store: store,
+            state: state
+        })
+        
+        
     }
     catch(error){
         console.debug(error);

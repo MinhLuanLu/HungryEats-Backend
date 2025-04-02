@@ -26,10 +26,12 @@ export function socketConnection(api_express) {
 
         socket.on('connection', async (data)=>{
         const Socket_id             = data?.Socket_id
-        const User_id               = data?.User_id
-        const Store_name            = data?.Store_name
-        const Email                 = data?.Email
-        const Username              = data?.Username
+        const User_id               = data?.User?.User_id
+        const Store_name            = data?.User?.Store_name
+        const Email                 = data?.User?.Email
+        const Username              = data?.User?.Username
+
+        //console.log(data.User)
     
         if(Store_name && User_id){
             console.info(`Store ${Store_name} is opening..`)

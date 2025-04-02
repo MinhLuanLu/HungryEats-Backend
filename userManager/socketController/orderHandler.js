@@ -4,6 +4,7 @@ import { updateFoodQuantity } from '../../api/food.js';
 import { Make_Query } from '../../database/databaseConnection.js';
 import log from 'minhluanlu-color-log';
 import { orderStatusConfig, socketConfig } from '../../config.js';
+import { getUser, getUserSocketId } from '../User/user.js';
 
 
 async function newOrderHandler(order, socket, io) {
@@ -25,7 +26,7 @@ async function newOrderHandler(order, socket, io) {
             VALUES(
                 ${Store_id}, ${User_id}, 
                 '${Food_item}', '${Drink_item}', 
-                ${Total_price}, 'none', '${Order_number}', '${orderStatusConfig.pending}'
+                ${Total_price}, 'none', '${Order_number}', '${orderStatusConfig.unprocessing}'
             )`
         )
         
@@ -42,8 +43,7 @@ async function newOrderHandler(order, socket, io) {
         log.info('save order successfully.');
         
         // Get the Order just save from database to comtinue send to the Store //
-
-        const getOrder = await Make_Query(`
+        const [getOrder] = await Make_Query(`
             SELECT * FROM Orders WHERE Order_number = "${Order_number}"   
         `);
 
@@ -56,8 +56,40 @@ async function newOrderHandler(order, socket, io) {
                 order: order
             }
         }
-        log.info('recived order successfully.');
+        log.info({
+            message: 'recived order successfully.',
+            order: getOrder
+        });
 
+        // send order to user as pending status //
+        const userSocketID = await getUserSocketId(order.User);
+        setTimeout(() => {
+            socket.emit(socketConfig.orderPending, getOrder);
+        }, 3000);
+
+        log.debug({
+            message: 'Send order pending back to user',
+                socketId: userSocketID
+        })
+        ///////////////////////////////////////////////////////////
+
+        // get user info //
+        const user = await getUser(order.User);
+        console.log('insert user info to order', user)
+        if(user.length === 0){
+            log.warn({
+                message: 'recived user failed.',
+                user: user
+            })
+        }
+
+        // add user info to order //
+        console.log('insert user to order.')
+        getOrder.User = user
+
+        //////////////////////////////////////////////////////////
+
+        // get sotroe SocketID /////
         const Store_SocketId = await getStoreSocketId(order.Store);
         if(Store_SocketId.length == 0){
             log.err({message: "Failed to recived store SocketID"});
@@ -77,17 +109,66 @@ async function newOrderHandler(order, socket, io) {
         }
 
         log.debug(updatePurchase)
+        ////////////////////////////////////////////////////////////////////////////////////
 
-        // ======================= Handle update Food quantity after be ordered ===================== //
+        // Handle update Food quantity after be ordered ===================== //
+        log.debug("Update food quantity")
         const updateFood = await updateFoodQuantity(order.Food_item);
         if(updateFood.length == 0){
             log.warn({message: 'failed to update food quantity.'})
         }
         log.debug(updateFood)
+
+        /////////////////////////////////////////////////////////
  
-        // ===================== save and send Pending Order ====================//
+        // Check store recived order or not than send back to user ====================//
+        console.log("checking store recived order yet.")
+        let checkOrderRecived;
+        let time = 10000
+        setTimeout(async () => {
+            checkOrderRecived = await checkOrderStatus(getOrder, orderStatusConfig.pending)
+            if(!checkOrderRecived){
+                log.warn({
+                    message: `Store not recived order after a while`,
+                    time: `${time} seconds`
+                })
+
+                console.log('------ Attempt to send order again ------');
+                socket.to(Store_SocketId).emit(socketConfig.processOrder, getOrder);
+                // attemp to check again after 10000 secondes ///
+                setTimeout(async ()=>{
+                    checkOrderRecived = await checkOrderStatus(getOrder, orderStatusConfig.pending)
+                    if(!checkOrderRecived){
+                        log.warn({
+                            message: `Store not recived order after a while`,
+                            time: `${time} seconds`
+                        })
         
-        // ======================================================================== //
+                        return
+                    }
+                    log.info('Store recived order successfully in seconde time.');
+                    let getUpdateOrder = await Make_Query(`
+                        SELECT * FROM Orders WHERE Order_number = '${Order_number}'    
+                    `)
+
+                    socket.emit(socketConfig.confirmRecivedOrder, getOrder)
+                },time)
+    
+                return
+            }
+
+            log.info('Store recived order successfully.');
+            let getUpdateOrder = await Make_Query(`
+                SELECT * FROM Orders WHERE Order_number = '${Order_number}'    
+            `);
+
+            socket.emit(socketConfig.confirmRecivedOrder, getOrder)
+
+            // Send order status back to user ///
+            
+        }, time);
+        
+        
         // ================ Get the food list then send to all users ======================= //
         
     }
@@ -138,7 +219,33 @@ async function getStoreSocketId(Store) {
     }
 }
 
+async function checkOrderStatus(order ,expectStatus) {
+    const Order_number = order.Order_number;
+  
+    const [checkOrder] = await Make_Query(`
+        SELECT * FROM Orders WHERE Order_number = '${Order_number}'   
+    `);
+    if(!checkOrder){
+        log.debug("order not exist");
+        return false
+    }
 
+    if(checkOrder.Order_status != expectStatus){
+        log.debug({
+            message: "Order status not match the expect Status",
+            expectStatus: expectStatus,
+            currentStatus: checkOrder.Order_status
+        });
+        return false
+    }
+
+    log.debug({
+        message: "Order Status is match the expect Status.",
+        expectStatus: expectStatus,
+        currentStatus: checkOrder.Order_status
+    });
+    return true
+}
 
 
 export default newOrderHandler;

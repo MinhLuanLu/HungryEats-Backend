@@ -2,11 +2,12 @@ import { Make_Query } from '../../database/databaseConnection.js';
 import StoreStatusHandler from './storeStatusHandler.js';
 import orderAction from './orderAction.js';
 import UpdateFoodQuantityHandler from './updateFoodQuantityHandler.js';
+import { socketConfig } from '../../config.js';
 
 async function StoreSocketHandler(socket, io) {
 
     // ===========================  Handle update store status live => Close or Open from Store UI ======================= //
-    socket.on('close_store',async (data)=>{
+    socket.on(socketConfig.updateStoreState,async (data)=>{
         StoreStatusHandler(data, socket, io)
     });
 

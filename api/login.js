@@ -1,5 +1,6 @@
 import { Make_Query } from "../database/databaseConnection.js";
-import log from 'minhluanlu-color-log'
+import log from 'minhluanlu-color-log';
+import { ADMIN } from "../config.js";
 
 async function Login(request, response) {
     try{
@@ -16,7 +17,7 @@ async function Login(request, response) {
                 const  get_password = check_authentication?.Password;
                 const get_user_role = check_authentication?.Role;
                 if (Password == get_password){
-                    if(get_user_role == "Seller"){
+                    if(get_user_role === ADMIN.business){
                         const get_seller_info = await Make_Query(`SELECT * FROM Users INNER JOIN Stores ON Users.User_id =  Stores.User_id WHERE Email = '${Email}'`);
                         log.debug(get_seller_info)
                         response.status(200).send({
@@ -30,13 +31,20 @@ async function Login(request, response) {
                             data: Email
                         }
                     }
-                    if(get_user_role == "User"){
+                    if(get_user_role === ADMIN.private){
                         const get_user_info = await Make_Query(`SELECT * FROM Users WHERE Email = '${Email}'`);
                         log.debug(get_user_info)
                         response.status(200).send({
                             success: true,
                             message: "Login Successfully..",
                             data: get_user_info
+                        })
+                    }
+
+                    if(get_user_role !== ADMIN.business || get_user_role !== ADMIN.private){
+                        log.warn({
+                            message: "User role invailid",
+                            Role: get_user_role
                         })
                     }
                 }

@@ -29,6 +29,12 @@ export const ADMIN = {
     private: "private"
 }
 
+export const purchaseLog = {
+    available: "available",
+    assigned: "assigned",
+    redeemed: "redeemed"
+}
+
 export const demoAccount = {
     cardNumber: 411111111111,
     CCV: 123

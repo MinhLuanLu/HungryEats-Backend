@@ -57,8 +57,8 @@ INSERT INTO Orders (Store_id, User_id, Food_item, Drink_item, Total_price, Picku
                 120 , "none",
                 "888888" , "${orderStatus.pending}"
             )
-
+SELECT * FROM Purchase_log
 
 SHOW TABLES
 
-SELECT * FROm Discounts
+UPDATE Purchase_log SET Status = "available" WHERE User_id = 12

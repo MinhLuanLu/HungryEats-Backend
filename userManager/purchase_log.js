@@ -1,5 +1,6 @@
 import { Make_Query } from "../database/databaseConnection.js";
-import log from 'minhluanlu-color-log'
+import log from 'minhluanlu-color-log';
+import { purchaseLog } from "../config.js";
 
 async function CreatePurchaseLog(order) {
     console.log('PUSRCHASE ORDER', order)
@@ -24,11 +25,13 @@ async function CreatePurchaseLog(order) {
             log.info(`Create new purchase log with User_id:${User_id} and Store_id:${Store_id}`);
             try{
                 await Make_Query(
-                    `INSERT INTO Purchase_log (User_id , Store_id, Purchase_count, Type) VALUES(
+                    `INSERT INTO Purchase_log (User_id , Store_id, Purchase_count, Type, Status) VALUES(
                         ${User_id},
                         ${Store_id},
                         ${1},
-                        'none'
+                        'none',
+                        '${purchaseLog.available}'
+
                     )`);
                 return{
                     success: true,
@@ -86,7 +89,8 @@ async function getDiscountCode(request, response) {
 
     try{
         const [userPurchaseLog] = await Make_Query(`SELECT * FROM Purchase_log WHERE User_id = ${User.User_id}`)
-        userPurchaseCount = userPurchaseLog?.Purchase_count
+        userPurchaseCount = userPurchaseLog?.Purchase_count;
+        userPurchaseStatus = userPurchaseCount?.Status;
         
         const storeDiscounts = await Make_Query(`SELECT * FROM Discounts INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id WHERE Discounts.Store_id =  ${Store.Store_id}`);
         if(storeDiscounts.length === 0){
@@ -111,7 +115,7 @@ async function getDiscountCode(request, response) {
                 userPurchaseCount: userPurchaseCount
             })
 
-            if(userPurchaseCount >= storePurchaseCount){
+            if(userPurchaseCount >= storePurchaseCount && userPurchaseStatus === purchaseLog.available){
                 discountList.push(storeItem)
             }
         }
@@ -156,96 +160,54 @@ async function ApplyDiscountCode(request, response) {
         Store,
         DiscountCode
     } = request.body;
-    console.log(User)
-    response.json({
-        success: true,
-        data: 'Hello'
-    })
-    return
     try{
-        const {
-            Email,
-            Store_id,
-            Discount_code
-        } = request.body;
-        const get_store_discount_count = await Make_Query(`SELECT * FROM Discounts INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id WHERE Discounts.Store_id =  ${Store_id}`);
-        for(const item of get_store_discount_count){
-            const store_discount_count = item?.Purchase_count;
-            const store_discount_code = item?.Discount_code;
+        const getDiscount = await Make_Query(`SELECT * FROM Discounts WHERE Store_id = ${Store.Store_id}`);
+        const [getUserPurchaseLog] = await Make_Query(`SELECT * FROM Purchase_log WHERE User_id = ${User.User_id}`)
         
-            if(store_discount_count === undefined || store_discount_count < 1){
-                log.debug({
-                    success: false,
-                    message: "No discount has been set!",
-                    data: []
-                });
+        const userPurchaseCount = getUserPurchaseLog.Purchase_count;
+        const userPurchaseStatus = getUserPurchaseLog.Status;
+        const userPurchaseID = getUserPurchaseLog.Purchase_log_id;
 
-                response.status(200).json({
-                    success: false,
-                    message: "No discount has been set!",
-                    data: []
-                });
-                break
-            }
-            else{
-
-                const [get_user_id] = await Make_Query(`SELECT User_id FROM Users WHERE Email = '${Email}'`);
-                const User_id = get_user_id?.User_id;
-                const [check_user_discount_count] = await Make_Query(`SELECT Purchase_count FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
-                const user_purchase_count = check_user_discount_count?.Purchase_count;
+        for(const item of getDiscount){
+            const storePurchaseCount = item.Purchase_count;
+            const storeDiscountCode = item.Discount_code;
+            
+            if(userPurchaseCount >= storePurchaseCount && userPurchaseStatus === purchaseLog.available ){
                 
-                if(user_purchase_count >= store_discount_count){
-                    if(Discount_code == store_discount_code){
-                        log.info({
-                            success: true,
-                            message: `You get a discount ${item?.Discount_value}% from ${item?.Store_name}`,
-                            data: item
-                        })
-
-                        response.status(200).json({
-                            success: true,
-                            message: `You get a discount ${item?.Discount_value}% from ${item?.Store_name}`,
-                            data: item
-                        })
-                        break
-                    }else{
-                        log.error(`Discount code doesn't match`)
-                        response.json({
-                            success:false,
-                            message: `Discount code doesn't match`,
-                            data: Discount_code
-                        })
-                        return
-                    }
-                }
-                else{
-                    console.log({
-                        message: "User purchase count doesn't match to store discount count.",
-                        data:  `Store discount count: ${store_discount_count} => User purchase count: ${user_purchase_count}`
-                    });
-                    response.json({
-                        success: false,
-                        message: "User purchase count dosen't match to store discount count.",
-                        data: `Store discount count: ${store_discount_count} => User purchase count: ${user_purchase_count}`
+                if(storeDiscountCode !== DiscountCode){
+                    // update Purchase_log status to assigned //
+                    await Make_Query(`UPDATE Purchase_log SET Status = '${purchaseLog.assigned}' WHERE Purchase_log_id = ${userPurchaseID}`)
+                    
+                    log.debug({
+                        success: true,
+                        message: "Discount was found",
+                        discountCode: DiscountCode,
+                        data: item
+                    })
+                    response.status(200).json({
+                        success: true,
+                        message: "Discount was found",
+                        discountCode: DiscountCode,
+                        data: item
                     })
                     return
                 }
             }
         }
-        response.json({
-            success:false,
-            message: `Discount code doesn't match`,
-            data: Discount_code
-        })
-    }   
-    catch(error){
-        log.err('Failed to apply discount code');
+
         response.json({
             success: false,
-            message: 'Failed to apply discount code',
-            data: error
+            message: "Discount code was not found.",
+            discountCode: DiscountCode,
         })
-        return
+
+
+    }catch(error){
+        response.status(400).json({
+            success: false,
+            message: "Discount code was not found.",
+            discountCode: DiscountCode,
+        })
     }
 }
 

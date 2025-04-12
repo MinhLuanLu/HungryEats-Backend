@@ -3,8 +3,9 @@ import Searching from "./searching.js";
 import StoreFavorite from "./storeFavorite.js";
 import PendingOrder from "./pendingOrder.js";
 import OrderHistory from "./orderHistory.js";
-import {Purchase_Log_Check} from '../../userManager/purchase_log.js';
+import {getDiscountCode} from '../../userManager/purchase_log.js';
 import { ApplyDiscountCode } from "../../userManager/purchase_log.js";
+import PaymentMetodHandler from "./paymentMethod.js";
 
 
 const userController = {
@@ -13,8 +14,9 @@ const userController = {
     StoreFavorite,
     PendingOrder,
     OrderHistory,
-    Purchase_Log_Check,
-    ApplyDiscountCode
+    getDiscountCode,
+    ApplyDiscountCode,
+    PaymentMetodHandler
 }
 
 export default userController;

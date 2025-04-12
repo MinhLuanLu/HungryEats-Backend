@@ -19,6 +19,7 @@ async function newOrderHandler(order, socket, io) {
     const Food_item = JSON.stringify(order?.Food_item);
     const Drink_item = JSON.stringify(order?.Drink_item);
     const Total_price = order.Total_price
+    const Pickup_time = order.Pickup_time
 
     try{
         // save order to database //
@@ -26,7 +27,7 @@ async function newOrderHandler(order, socket, io) {
             VALUES(
                 ${Store_id}, ${User_id}, 
                 '${Food_item}', '${Drink_item}', 
-                ${Total_price}, 'none', '${Order_number}', '${orderStatusConfig.unprocessing}'
+                ${Total_price}, '${Pickup_time}', '${Order_number}', '${orderStatusConfig.unprocessing}'
             )`
         )
         
@@ -89,7 +90,7 @@ async function newOrderHandler(order, socket, io) {
 
         //////////////////////////////////////////////////////////
 
-        // get sotroe SocketID /////
+        // get store SocketID /////
         const Store_SocketId = await getStoreSocketId(order.Store);
         if(Store_SocketId.length == 0){
             log.err({message: "Failed to recived store SocketID"});
@@ -100,15 +101,6 @@ async function newOrderHandler(order, socket, io) {
         socket.to(Store_SocketId).emit(socketConfig.processOrder, getOrder)
         log.debug('sending order')
         
-        // ================== Create and update Purchase log ============================ //
-        const updatePurchase = await updatePurchaseLog(order.User, order.Store);
-        if(updatePurchase.length == 0){
-            log.warn({
-                message: "Faild to update purchase log."
-            })
-        }
-
-        log.debug(updatePurchase)
         ////////////////////////////////////////////////////////////////////////////////////
 
         // Handle update Food quantity after be ordered ===================== //
@@ -143,6 +135,8 @@ async function newOrderHandler(order, socket, io) {
                             message: `Store not recived order after a while`,
                             time: `${time} seconds`
                         })
+                        // send failedRecivedOrder to user //
+                        socket.emit(socketConfig.failedRecivedOrder, getOrder)
         
                         return
                     }
@@ -152,6 +146,16 @@ async function newOrderHandler(order, socket, io) {
                     `)
 
                     socket.emit(socketConfig.confirmRecivedOrder, getOrder)
+                    // ================== Create and update Purchase log ============================ //
+                    console.log('------------------- Create Purchase log -------------------------')
+                    const updatePurchase = await CreatePurchaseLog(getOrder);
+                    if(updatePurchase.length == 0){
+                        log.warn({
+                            message: "Faild to update purchase log."
+                        })
+                    }
+
+                    log.debug(updatePurchase)
                 },time)
     
                 return
@@ -165,7 +169,18 @@ async function newOrderHandler(order, socket, io) {
             socket.emit(socketConfig.confirmRecivedOrder, getOrder)
 
             // Send order status back to user ///
-            
+
+            // ================== Create and update Purchase log ============================ //
+            console.log('------------------- Create Purchase log -------------------------')
+            const updatePurchase = await CreatePurchaseLog(getOrder);
+            if(updatePurchase.length == 0){
+                log.warn({
+                    message: "Faild to update purchase log."
+                })
+            }
+
+            log.debug(updatePurchase)
+                
         }, time);
         
         

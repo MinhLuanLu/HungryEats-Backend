@@ -2,89 +2,140 @@ import { Make_Query } from "../database/databaseConnection.js";
 import log from 'minhluanlu-color-log'
 
 async function CreatePurchaseLog(order) {
+    console.log('PUSRCHASE ORDER', order)
+    const User_id = order.User_id;
+    const Store_id = order.Store_id;
+    let exist;
     try{
-        const User_id = order[0]["User_id"];
-        const Store_id = order[0]["Store_id"];
-        const [check_log] = await Make_Query(`SELECT EXISTS (SELECT 1 FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id})`);
-        const result = Object.keys(check_log)[0];
-        if(!check_log[result]){
-            console.log(`Create new purchase log with User_id:${User_id} and Store_id:${Store_id}`);
-            const save_purchase_log = await Make_Query(
-                `INSERT INTO Purchase_log (User_id , Store_id, Purchase_count) VALUES(
-                    ${User_id},
-                    ${Store_id},
-                    ${1}
-                )`);
-            return{
-                success: true,
-                message: `Create Purchase Log for User_id:${User_id} with Store_id: ${Store_id}`,
-                data: 
-                {
-                    Purchase_count: 1
+        const check_log = await Make_Query(`
+            SELECT EXISTS (
+              SELECT 1 FROM Purchase_log 
+              WHERE User_id = ${User_id} AND Store_id = ${Store_id}
+            ) AS exists_flag;
+          `);
+          
+          const result = check_log[0]?.exists_flag ?? 0;
+          const exist = result === 1;
+          
+       
+        /// Purchase log not exists yet create one ///
+        if(!exist){
+            console.log('------------ Purchase log not exist yet, create one --------------------')
+            log.info(`Create new purchase log with User_id:${User_id} and Store_id:${Store_id}`);
+            try{
+                await Make_Query(
+                    `INSERT INTO Purchase_log (User_id , Store_id, Purchase_count, Type) VALUES(
+                        ${User_id},
+                        ${Store_id},
+                        ${1},
+                        'none'
+                    )`);
+                return{
+                    success: true,
+                    message: `Create Purchase Log for User_id:${User_id} with Store_id: ${Store_id}`,
+                    data: 
+                    {
+                        Purchase_count: 1
+                    }
                 }
+            }catch(error){
+                log.warn(error);
+                return []
             }
         }
 
-        if(check_log[result]){
+        if(exist){
+            console.log('------------- Purchase log exist already, update it ------------------------')
             console.log(`Update purchase log with User_id: ${User_id} and Store_id: ${Store_id}`);
-            const [current_purchase_count] = await Make_Query(`SELECT Purchase_count FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
-            const new_purchase_count = current_purchase_count?.Purchase_count + 1; // update to 1
-            const update_purchase_count = await Make_Query(`UPDATE Purchase_log SET Purchase_count = ${new_purchase_count} WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
-            return{
-                success: true,
-                message: `Update Purchase Log for User_id: ${User_id} with Store_id: ${Store_id}`,
-                data: 
-                {
-                    Purchase_count: new_purchase_count
+
+            try{
+                const [current_purchase_count] = await Make_Query(`SELECT Purchase_count FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
+                const new_purchase_count = current_purchase_count?.Purchase_count + 1; // update to 1
+                
+                await Make_Query(`UPDATE Purchase_log SET Purchase_count = ${new_purchase_count} WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
+                return{
+                    success: true,
+                    message: `Update Purchase Log for User_id: ${User_id} with Store_id: ${Store_id}`,
+                    data: 
+                    {
+                        Purchase_count: new_purchase_count
+                    }
                 }
+            }catch(error){
+                log.warn(error);
+                return []
             }
 
         }
     }
     catch(error){
-        return{
-            success: false,
-            message: error
-        }
+        log.warn(error)
+        return []
     }
     
 }
 
-async function Purchase_Log_Check(request, response) {
-    try{
-        const {
-            Email,
-            Store_id
-        } = request.body;
-        const get_store_discount_count = await Make_Query(`SELECT * FROM Discounts INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id WHERE Discounts.Store_id =  ${Store_id}`);
-        
-        for(const item of get_store_discount_count){
-            const store_discount_count = item?.Purchase_count;
-        
-            if(store_discount_count === undefined || store_discount_count < 1){
-                response.status(200).json({
-                    success: false,
-                    message: "No discount has been set!",
-                    data: []
-                });
-            }
-            else{
+async function getDiscountCode(request, response) {
+    const {
+        User,
+        Store
+    } = request.body;
 
-                const [get_user_id] = await Make_Query(`SELECT User_id FROM Users WHERE Email = '${Email}'`);
-                const User_id = get_user_id?.User_id;
-                const [check_user_discount_count] = await Make_Query(`SELECT Purchase_count FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
-                const user_purchase_count = check_user_discount_count?.Purchase_count;
-                
-                if(store_discount_count === user_purchase_count){
-                    response.status(200).json({
-                        success: true,
-                        message: `You get a discount ${item?.Discount_value}% from ${item?.Store_name}`,
-                        data: item
-                    })
-                    break
-                }
+    let userPurchaseCount;
+    let discountList = []
+
+    try{
+        const [userPurchaseLog] = await Make_Query(`SELECT * FROM Purchase_log WHERE User_id = ${User.User_id}`)
+        userPurchaseCount = userPurchaseLog?.Purchase_count
+        
+        const storeDiscounts = await Make_Query(`SELECT * FROM Discounts INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id WHERE Discounts.Store_id =  ${Store.Store_id}`);
+        if(storeDiscounts.length === 0){
+            log.debug({
+                message: 'Store doesnt has discounts',
+                discount: storeDiscounts
+            })
+            response.json({
+                message: 'Store doesnt has discounts',
+                discount: storeDiscounts
+            })
+            return
+        }
+        
+        for(const storeItem of storeDiscounts){
+            const storePurchaseCount = storeItem.Purchase_count;
+            console.log('---------- check purchase count is match ----------------')
+            log.debug({
+                user: User.Email,
+                store: Store.Store_name,
+                requirePurchaseCount: storePurchaseCount,
+                userPurchaseCount: userPurchaseCount
+            })
+
+            if(userPurchaseCount >= storePurchaseCount){
+                discountList.push(storeItem)
             }
         }
+
+        console.log('----------- check discount is done ------------------')
+        if(discountList.length === 0){
+            log.debug({
+                message: 'no discount was found',
+                store: Store.Store_name
+            })
+            response.json({
+                message: 'no discount was found',
+                store: Store.Store_name
+            });
+            return
+        }
+
+        response.status(200).send({
+            success: true,
+            message: "Discounts was found",
+            data: discountList
+            
+        })
+        return
     }
     catch(error){
         log.debug({
@@ -100,6 +151,17 @@ async function Purchase_Log_Check(request, response) {
 }
 
 async function ApplyDiscountCode(request, response) {
+    const {
+        User,
+        Store,
+        DiscountCode
+    } = request.body;
+    console.log(User)
+    response.json({
+        success: true,
+        data: 'Hello'
+    })
+    return
     try{
         const {
             Email,
@@ -230,4 +292,4 @@ async function updatePurchaseLog(User, Store) {
     
 }
 
-export { CreatePurchaseLog, Purchase_Log_Check, ApplyDiscountCode, updatePurchaseLog}
+export { CreatePurchaseLog, getDiscountCode, ApplyDiscountCode, updatePurchaseLog}

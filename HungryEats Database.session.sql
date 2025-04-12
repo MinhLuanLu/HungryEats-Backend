@@ -57,3 +57,8 @@ INSERT INTO Orders (Store_id, User_id, Food_item, Drink_item, Total_price, Picku
                 120 , "none",
                 "888888" , "${orderStatus.pending}"
             )
+
+
+SHOW TABLES
+
+SELECT * FROm Discounts

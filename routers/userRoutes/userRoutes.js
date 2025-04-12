@@ -4,13 +4,18 @@ import userController from '../../userManager/apiController/index.js';
 const router = express.Router();
 
 // Define the route
+////////////////////////////////
 router.get('/storeList/api', userController.StoreList);
+router.get('/paymentMethod/api', userController.PaymentMetodHandler)
+
+////////////////////////////////////////
 router.post('/searching/api', userController.Searching);
 router.post('/storeFavorite/api', userController.StoreFavorite);
 router.post('/pendingOrder/api', userController.PendingOrder);
 router.post('/orderHistory/api', userController.OrderHistory);
-router.post('/purchaseLog/api', userController.Purchase_Log_Check);
-router.post('/discountcode/api', userController.ApplyDiscountCode)
+router.post('/getDiscountCode/api', userController.getDiscountCode);
+router.post('/ApplyDiscountCode/api', userController.ApplyDiscountCode)
+router.post('/paymentMethod/api', userController.PaymentMetodHandler)
 
 export default router;
 

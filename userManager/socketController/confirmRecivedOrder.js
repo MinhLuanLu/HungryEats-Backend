@@ -30,7 +30,7 @@ async function confirmRecivedOrder(order, socket, io) {
         return
     }
     
-    if(getOrder[0].Order_status === orderStatusConfig.pending){
+    if(getOrder[0].Order_status !== orderStatusConfig.pending){
         log.warn({
             message: 'Failed to update orderStatus',
             expectStatus: orderStatusConfig.procesing,

@@ -11,7 +11,8 @@ export const socketConfig = {
     confirmRecivedOrder: "store.confirmRecivedOrder.1",
     updateStoreState: "store.updateStoreState.1",
     orderAction: "store.orderAction.1",
-    orderPending: "order.pending.1"
+    orderPending: "order.pending.1",
+    failedRecivedOrder: 'order.failedRecivedOrder.1'
 }
 
 export const orderStatusConfig = {
@@ -27,4 +28,10 @@ export const ADMIN = {
     business: "business",
     private: "private"
 }
+
+export const demoAccount = {
+    cardNumber: 411111111111,
+    CCV: 123
+}
+
 export default config; 

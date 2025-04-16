@@ -1,10 +1,11 @@
 import {v4 as uuidv4} from 'uuid';
-import {CreatePurchaseLog, updatePurchaseLog} from '../purchase_log.js';
+import {CreatePurchaseLog, updatePurchaseLog, updatePurchaseLogStatus} from '../purchase_log.js';
 import { updateFoodQuantity } from '../../api/food.js';
 import { Make_Query } from '../../database/databaseConnection.js';
 import log from 'minhluanlu-color-log';
-import { orderStatusConfig, socketConfig } from '../../config.js';
+import { orderStatusConfig, purchaseLog, socketConfig } from '../../config.js';
 import { getUser, getUserSocketId } from '../User/user.js';
+
 
 
 async function newOrderHandler(order, socket, io) {
@@ -62,14 +63,14 @@ async function newOrderHandler(order, socket, io) {
             order: getOrder
         });
 
-        // send order to user as pending status //
+        // send order to user as unprocessing status //
         const userSocketID = await getUserSocketId(order.User);
         setTimeout(() => {
-            socket.emit(socketConfig.orderPending, getOrder);
+            socket.emit(socketConfig.orderUnprocessing, getOrder);
         }, 3000);
 
         log.debug({
-            message: 'Send order pending back to user',
+            message: 'Send order unprocessing back to user',
                 socketId: userSocketID
         })
         ///////////////////////////////////////////////////////////
@@ -135,17 +136,32 @@ async function newOrderHandler(order, socket, io) {
                             message: `Store not recived order after a while`,
                             time: `${time} seconds`
                         })
+                        // update order status to failed
+                        const changeOrderStatus = await Make_Query(`
+                            UPDATE Orders
+                            SET Order_status = '${orderStatusConfig.failed}' 
+                            WHERE Order_number = '${getOrder.Order_number}';
+                        `);
+
+                        const [getFailedOrder] = await Make_Query(`SELECT * FROM Orders WHERE Order_number = '${getOrder.Order_number}'`)
                         // send failedRecivedOrder to user //
-                        socket.emit(socketConfig.failedRecivedOrder, getOrder)
+                        socket.emit(socketConfig.failedRecivedOrder, getFailedOrder);
+                        log.debug('send failed order to user.')
         
                         return
                     }
                     log.info('Store recived order successfully in seconde time.');
-                    let getUpdateOrder = await Make_Query(`
+                    let [getUpdateOrder] = await Make_Query(`
                         SELECT * FROM Orders WHERE Order_number = '${Order_number}'    
                     `)
 
-                    socket.emit(socketConfig.confirmRecivedOrder, getOrder)
+                    socket.emit(socketConfig.confirmRecivedOrder, getUpdateOrder);
+
+                    // update the purchaerlog status to redemed if order using discount //
+                    if(order.Discount != undefined){
+                        const updateStatus = await updatePurchaseLogStatus(order.User, order.Store, purchaseLog.redeemed);
+                        updateStatus ? log.debug('update purchaselog successfully') : log.warn('failed to update purchase log')
+                    }
                     // ================== Create and update Purchase log ============================ //
                     console.log('------------------- Create Purchase log -------------------------')
                     const updatePurchase = await CreatePurchaseLog(getOrder);
@@ -162,13 +178,19 @@ async function newOrderHandler(order, socket, io) {
             }
 
             log.info('Store recived order successfully.');
-            let getUpdateOrder = await Make_Query(`
+            let [getUpdateOrder] = await Make_Query(`
                 SELECT * FROM Orders WHERE Order_number = '${Order_number}'    
             `);
 
-            socket.emit(socketConfig.confirmRecivedOrder, getOrder)
-
-            // Send order status back to user ///
+            // send order to user as pending status
+            socket.emit(socketConfig.confirmRecivedOrder, getUpdateOrder)
+  
+            // update the purchaerlog status to redemed if order using discount //
+            if(order.Discount != undefined){
+                const updateStatus = await updatePurchaseLogStatus(order.User, order.Store, purchaseLog.redeemed);
+                updateStatus ? log.debug('update purchaselog successfully') : log.warn('failed to update purchase log')
+            }
+            
 
             // ================== Create and update Purchase log ============================ //
             console.log('------------------- Create Purchase log -------------------------')
@@ -180,6 +202,7 @@ async function newOrderHandler(order, socket, io) {
             }
 
             log.debug(updatePurchase)
+            return
                 
         }, time);
         

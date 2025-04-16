@@ -62,3 +62,10 @@ SELECT * FROM Purchase_log
 SHOW TABLES
 
 UPDATE Purchase_log SET Status = "available" WHERE User_id = 12
+
+
+ALTER TABLE Stores
+DROP COLUMN Favorite;
+
+ALTER TABLE Store_favorite
+ADD COLUMN Favorite BOOL DEFAULT 0;

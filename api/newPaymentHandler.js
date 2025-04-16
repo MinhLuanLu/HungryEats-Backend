@@ -14,8 +14,10 @@ async function newPayment(request, response) {
         message: "Recived payment request",
         user: User
     })
-    console.log(Order)
 
+    const price = Math.round(Order.Total_price + Order.Moms.Moms_price)
+
+   
     const customer = await stripe.customers.create(
         {email: User.Email}
     );
@@ -25,7 +27,7 @@ async function newPayment(request, response) {
     );
 
     const paymentIntent = await stripe.paymentIntents.create({
-        amount: Order.Total_price * 100,
+        amount: price * 100,
         currency: 'dkk',
         customer: customer.id,
         // In the latest version of the API, specifying the `automatic_payment_methods` parameter
@@ -34,6 +36,7 @@ async function newPayment(request, response) {
           enabled: true,
         },
       });
+    
      
       response.status(200).send({
         paymentIntent: paymentIntent.client_secret,

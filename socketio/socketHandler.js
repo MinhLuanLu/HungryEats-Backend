@@ -22,7 +22,7 @@ export function socketConnection(api_express) {
 
     // Handle update the socket id from Users when connection is successfully absed Store name or User_id 
     io.on('connection', async (socket) => {
-        console.info(`Socket [${socket.id}] connected`)
+        console.info(`Socket [${socket.id}] connected`);
 
         socket.on('connection', async (data)=>{
         const Socket_id             = data?.Socket_id

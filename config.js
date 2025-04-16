@@ -11,7 +11,7 @@ export const socketConfig = {
     confirmRecivedOrder: "store.confirmRecivedOrder.1",
     updateStoreState: "store.updateStoreState.1",
     orderAction: "store.orderAction.1",
-    orderPending: "order.pending.1",
+    orderUnprocessing: "order.unprocessing.1",
     failedRecivedOrder: 'order.failedRecivedOrder.1'
 }
 
@@ -21,7 +21,8 @@ export const orderStatusConfig = {
     procesing: "processing",// when store recived order
     ready: "ready", // when order is ready
     done: "done", // when order is ready
-    cancle : "cancle" // when store cancle order
+    cancle : "cancle", // when store cancle order
+    failed: "failed"
 }
 
 export const ADMIN = {

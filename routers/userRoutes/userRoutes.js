@@ -14,8 +14,9 @@ router.post('/storeFavorite/api', userController.StoreFavorite);
 router.post('/pendingOrder/api', userController.PendingOrder);
 router.post('/orderHistory/api', userController.OrderHistory);
 router.post('/getDiscountCode/api', userController.getDiscountCode);
-router.post('/ApplyDiscountCode/api', userController.ApplyDiscountCode)
-router.post('/paymentMethod/api', userController.PaymentMetodHandler)
+router.post('/ApplyDiscountCode/api', userController.ApplyDiscountCode);
+router.post('/paymentMethod/api', userController.PaymentMetodHandler);
+router.post('/find/discounts/api', userController.LookingForDiscount)
 
 export default router;
 

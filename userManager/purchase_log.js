@@ -365,4 +365,70 @@ async function updatePurchaseLogStatus(User, Store, Status) {
     }
 }
 
-export { CreatePurchaseLog, getDiscountCode, ApplyDiscountCode, updatePurchaseLog, updatePurchaseLogStatus}
+
+async function LookingForDiscount(request, response) {
+    console.log('-------- looking for discounts ------------------');
+
+    const {
+        User,
+        Store
+    } = request.body;
+
+    let discountList = []
+
+    try{
+        const userPurchaseLog = await Make_Query(`SELECT * FROM Purchase_log WHERE User_id = ${User.User_id} AND Status = '${purchaseLog.available}'`);
+        const storeDiscount = await Make_Query(`SELECT * FROM Discounts WHERE Store_id = ${Store.Store_id}`);
+        
+        for(const user of userPurchaseLog){
+            const userPurchaseCount = user.Purchase_count;
+
+            for(const store of storeDiscount){
+                const storePurchaseCount = store.Purchase_count;
+                
+                if(userPurchaseCount >= storePurchaseCount){
+                    log.debug({
+                        message: "discount was found",
+                        data: store
+                    })
+                    discountList.push(store)
+                }
+            }
+        }
+
+        if(discountList.length === 0){
+            log.debug({
+                message: "no discount was found",
+                user: User,
+                store: Store
+            });
+
+            response.status(404).json({
+                success: false,
+                message:'no discount was found',
+                data: discountList
+            })
+            return
+        };
+
+        return response.status(200).json({
+            success: true,
+            message: "discounts was found",
+            data: discountList
+        })
+    }catch(error){
+        log.err({
+            success: false,
+            message: error
+        })
+    }
+}
+
+export { 
+    CreatePurchaseLog, 
+    getDiscountCode, 
+    ApplyDiscountCode, 
+    updatePurchaseLog, 
+    updatePurchaseLogStatus,
+    LookingForDiscount
+}

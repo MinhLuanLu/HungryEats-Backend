@@ -57,11 +57,11 @@ INSERT INTO Orders (Store_id, User_id, Food_item, Drink_item, Total_price, Picku
                 120 , "none",
                 "888888" , "${orderStatus.pending}"
             )
-SELECT * FROM Purchase_log
+SELECT * FROM Discounts
 
 SHOW TABLES
 
-UPDATE Purchase_log SET Status = "available" WHERE User_id = 12
+UPDATE Discounts SET Purchase_count = 1 WHERE Discounts_id = 4
 
 
 ALTER TABLE Stores
@@ -69,3 +69,8 @@ DROP COLUMN Favorite;
 
 ALTER TABLE Store_favorite
 ADD COLUMN Favorite BOOL DEFAULT 0;
+
+
+SELECT * FROM Purchase_log
+
+DELETE FROM Orders WHERE User_id = 12

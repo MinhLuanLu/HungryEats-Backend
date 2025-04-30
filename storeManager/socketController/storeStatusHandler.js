@@ -7,15 +7,16 @@ async function StoreStatusHandler(data, socket ,io){
     const store = data.Store;
     const state = data.State;
     let status;
+    
 
     if(state){
-        status = '1'
+        status = 1
     }else{
-        status = '0'
+        status = 0
     }
     console.log(status)
     try{
-        await Make_Query(`UPDATE Stores SET Status = '${status}' WHERE Store_id = ${store.Store_id}`)
+        await Make_Query(`UPDATE Stores SET Active = ${status} WHERE Store_id = ${store.Store_id}`)
         
         const get_all_store = await Make_Query(`SELECT * FROM Stores`);
         

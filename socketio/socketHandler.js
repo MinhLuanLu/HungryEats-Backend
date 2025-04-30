@@ -37,7 +37,7 @@ export function socketConnection(api_express) {
             console.info(`Store ${Store_name} is opening..`)
             try{
                 const save_socket_id = await Make_Query(`INSERT INTO Socketio (User_id, Socket_id) VALUES (${Number(User_id)}, '${Socket_id}'); `);
-                const update_store_status = await Make_Query(`UPDATE Stores SET Status = 1 WHERE User_id = ${Number(User_id)}`)
+                const update_store_status = await Make_Query(`UPDATE Stores SET Active = 1 WHERE User_id = ${Number(User_id)}`)
 
                 const get_all_stores_status = await Make_Query('SELECT * FROM Stores')
 
@@ -50,8 +50,8 @@ export function socketConnection(api_express) {
             }
             catch{
                 const save_socket_id = await Make_Query(`UPDATE Socketio SET Socket_id = '${Socket_id}' WHERE User_id = ${Number(User_id)};`)
-                const update_store_status = await Make_Query(`UPDATE Stores SET Status = 1 WHERE User_id = ${Number(User_id)}`)
-                const [get_store_status] = await Make_Query(`SELECT Status FROM Stores WHERE USer_id = ${Number(User_id)}`)
+                const update_store_status = await Make_Query(`UPDATE Stores SET Active = 1 WHERE User_id = ${Number(User_id)}`)
+                const [get_store_status] = await Make_Query(`SELECT Status FROM Stores WHERE User_id = ${Number(User_id)}`)
 
                 const get_all_stores_status = await Make_Query('SELECT * FROM Stores')
 

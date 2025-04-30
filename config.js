@@ -41,4 +41,8 @@ export const demoAccount = {
     CCV: 123
 }
 
+export const storeStatus = {
+    customer: 1
+}
+
 export default config; 

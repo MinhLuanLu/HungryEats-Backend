@@ -1,6 +1,3 @@
-
-
-
 class DataBase{
     constructor(){
         

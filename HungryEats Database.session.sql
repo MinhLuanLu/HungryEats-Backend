@@ -71,6 +71,11 @@ ALTER TABLE Store_favorite
 ADD COLUMN Favorite BOOL DEFAULT 0;
 
 
-SELECT * FROM Purchase_log
+SELECT * FROM Stores
 
 DELETE FROM Orders WHERE User_id = 12
+
+ALTER TABLE Stores
+ADD COLUMN Customer BOOLEAN DEFAULT 0
+
+DELETE 

@@ -43,7 +43,7 @@ SHOW TABLES
 DESCRIBE Orders
 SELECT * FROM Orders WHERE Order_number = d7561e24-d7a5-4924-96a2-ab957d639063
 
-DELETE FROM Orders WHERE Store_id = 1
+DELETE FROM Discounts WHERE Discounts_id = 3
 
 ALTER TABLE Orders MODIFY COLUMN Food_item JSON;
 ALTER TABLE Orders MODIFY COLUMN Drink_item JSON;
@@ -71,7 +71,7 @@ ALTER TABLE Store_favorite
 ADD COLUMN Favorite BOOL DEFAULT 0;
 
 
-SELECT * FROM Stores
+SELECT * FROM Discounts
 
 DELETE FROM Orders WHERE User_id = 12
 

@@ -5,7 +5,6 @@ import PendingOrder from "./pendingOrder.js";
 import OrderHistory from "./orderHistory.js";
 import {getDiscountCode} from '../../userManager/purchase_log.js';
 import { ApplyDiscountCode } from "../../userManager/purchase_log.js";
-import PaymentMetodHandler from "./paymentMethod.js";
 import { LookingForDiscount } from "../../userManager/purchase_log.js";
 
 
@@ -17,7 +16,6 @@ const userController = {
     OrderHistory,
     getDiscountCode,
     ApplyDiscountCode,
-    PaymentMetodHandler,
     LookingForDiscount
 }
 

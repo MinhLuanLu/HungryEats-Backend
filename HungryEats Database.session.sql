@@ -57,14 +57,14 @@ INSERT INTO Orders (Store_id, User_id, Food_item, Drink_item, Total_price, Picku
                 120 , "none",
                 "888888" , "${orderStatus.pending}"
             )
-SELECT * FROM Discounts
+SELECT * FROM Payments
 
 SHOW TABLES
 
 UPDATE Discounts SET Purchase_count = 1 WHERE Discounts_id = 4
 
 
-ALTER TABLE Stores
+ALTER TABLE Orders
 DROP COLUMN Favorite;
 
 ALTER TABLE Store_favorite
@@ -75,7 +75,20 @@ SELECT * FROM Discounts
 
 DELETE FROM Orders WHERE User_id = 12
 
-ALTER TABLE Stores
-ADD COLUMN Customer BOOLEAN DEFAULT 0
+ALTER TABLE Payments
+ADD COLUMN Payment_intents VARCHAR(255)
 
-DELETE 
+DESCRIBE Orders
+
+
+
+
+CREATE TABLE Payments (
+    Payment_id INT PRIMARY KEY,
+    user JSON,
+    `Order` JSON,
+    Payment_intent JSON,
+    Status VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

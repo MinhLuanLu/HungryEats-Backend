@@ -3,7 +3,7 @@ import Register from "../register.js";
 import FoodList from "../food.js";
 import Menu from "../menu.js";
 import Drink from "../drink.js";
-import newPayment from "../newPaymentHandler.js";
+import { newPayment , refundPaymentHandler} from "../payment.js";
 
 const ApiShared = {
     Login,
@@ -11,7 +11,8 @@ const ApiShared = {
     FoodList,
     Menu,
     Drink, 
-    newPayment
+    newPayment,
+    refundPaymentHandler
 }
 
 export default ApiShared;

@@ -20,10 +20,11 @@ SELECT * from Stores
 DELETE FROM Orders WHERE Store_id = 1
 SELECT EXISTS (SELECT 1 FROM Users WHERE User_id = 12 AND Username = "minhlu142");
 
-SELECT * FROM Stores
+SELECT * FROM Orders
+DESCRIBE Orders
 SELECT Socket_id FROM Socketio WHERE User_id = 12
 
-UPDATE Stores SET Status = '1' WHERE Store_id = 1
+UPDATE Orders SET Order_status = 'pending' WHERE Store_id = 1 AND Order_id = 759
 SELECT * 
     FROM Discounts 
     INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id 
@@ -39,6 +40,13 @@ SELECT Stores.Store_id, Stores.Store_name, Stores.Address, Stores.Phone_number, 
 SELECT * FROM purchase_log
 
 SHOW TABLES
+
+SELECT *
+FROM Orders 
+INNER JOIN Users ON Orders.User_id = Users.User_id
+WHERE Orders.store_id = 1 AND Orders.Order_status = 'pending';
+
+
 
 DESCRIBE Orders
 SELECT * FROM Orders WHERE Order_number = d7561e24-d7a5-4924-96a2-ab957d639063
@@ -57,7 +65,7 @@ INSERT INTO Orders (Store_id, User_id, Food_item, Drink_item, Total_price, Picku
                 120 , "none",
                 "888888" , "${orderStatus.pending}"
             )
-SELECT * FROM Payments
+SELECT * FROM Orders
 
 SHOW TABLES
 

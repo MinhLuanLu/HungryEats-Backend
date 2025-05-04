@@ -102,15 +102,6 @@ async function newOrderHandler(order, socket, io) {
         socket.to(Store_SocketId).emit(socketConfig.processOrder, getOrder)
         log.debug('sending order')
         
-        ////////////////////////////////////////////////////////////////////////////////////
-
-        // Handle update Food quantity after be ordered ===================== //
-        log.debug("Update food quantity")
-        const updateFood = await updateFoodQuantity(order.Food_item);
-        if(updateFood.length == 0){
-            log.warn({message: 'failed to update food quantity.'})
-        }
-        log.debug(updateFood)
 
         /////////////////////////////////////////////////////////
  
@@ -157,6 +148,16 @@ async function newOrderHandler(order, socket, io) {
 
                     socket.emit(socketConfig.confirmRecivedOrder, getUpdateOrder);
 
+                    ////////////////////////////////////////////////////////////////////////////////////
+
+                    // Handle update Food quantity after be ordered ===================== //
+                    log.debug("Update food quantity")
+                    const updateFood = await updateFoodQuantity(order.Food_item);
+                    if(updateFood.length == 0){
+                        log.warn({message: 'failed to update food quantity.'})
+                    }
+                    log.debug(updateFood)
+
                     // update the purchaerlog status to redemed if order using discount //
                     if(order.Discount != undefined){
                         const updateStatus = await updatePurchaseLogStatus(order.User, order.Store, purchaseLog.redeemed);
@@ -183,7 +184,17 @@ async function newOrderHandler(order, socket, io) {
             `);
 
             // send order to user as pending status
-            socket.emit(socketConfig.confirmRecivedOrder, getUpdateOrder)
+            socket.emit(socketConfig.confirmRecivedOrder, getUpdateOrder);
+
+            ////////////////////////////////////////////////////////////////////////////////////
+
+            // Handle update Food quantity after be ordered ===================== //
+            log.debug("Update food quantity")
+            const updateFood = await updateFoodQuantity(order.Food_item);
+            if(updateFood.length == 0){
+                log.warn({message: 'failed to update food quantity.'})
+            }
+            log.debug(updateFood)
   
             // update the purchaerlog status to redemed if order using discount //
             if(order.Discount != undefined){

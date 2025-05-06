@@ -1,6 +1,9 @@
 import { Make_Query } from "../../database/databaseConnection.js";
+import log from "minhluanlu-color-log";
 
 async function CreateDiscount(request, response) {
+    const {Store} = request.body;
+    return
     try{
         const {
             Store_name,
@@ -45,4 +48,37 @@ async function CreateDiscount(request, response) {
     }
 }
 
-export default CreateDiscount
+
+async function GetDiscounts(req, res) {
+    const {id} = req.params;
+    log.debug("Recived store Discounts");
+    const getDiscount = await Make_Query(`SELECT * FROM Discounts WHERE Store_id = ${id}`);
+
+    if(getDiscount.length == 0){
+        log.warn({
+            message: "No discounts was found with store",
+            storeId: storeID
+        });
+        res.status(400).json({
+            success: false,
+            message: "No discounts was found with store",
+            storeId: storeID
+        });
+        return
+    }
+
+    log.debug({
+        message: "Recived store discounts successfully.",
+        data: getDiscount
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "Recived store discounts successfully.",
+        data: getDiscount
+    });
+    return
+
+}
+
+export { CreateDiscount, GetDiscounts}

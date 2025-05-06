@@ -8,14 +8,14 @@ async function StoreStatusHandler(data, socket ,io){
     const state = data.State;
     let status;
     
+    log.debug("-------- Recived Store status event -----------------")
 
     if(state){
         status = 1
     }else{
         status = 0
     }
-    console.log(status)
-    console.log(data)
+    
     try{
         await Make_Query(`UPDATE Stores SET Active = ${status} WHERE Store_id = ${store.Store_id}`)
         

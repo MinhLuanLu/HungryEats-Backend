@@ -10,7 +10,7 @@ async function RecivedOrders(req, res) {
     const getOrders = await Make_Query(`SELECT *
         FROM Orders 
         INNER JOIN Users ON Orders.User_id = Users.User_id
-        WHERE Orders.Store_id = ${id} AND Orders.Order_status = '${orderStatusConfig.pending}';`
+        WHERE Orders.Store_id = ${id} AND Orders.Order_status = '${orderStatusConfig.pending}' OR Orders.Order_status = '${orderStatusConfig.procesing}' OR Orders.Order_status = '${orderStatusConfig.ready}';`
     );
     
     if(getOrders.length == 0){
@@ -27,6 +27,7 @@ async function RecivedOrders(req, res) {
         return
     }
 
+    console.log(getOrders)
     getOrders.Password = "*********"
 
     log.debug("recived pending orders successfully.")

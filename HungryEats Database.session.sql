@@ -7,8 +7,9 @@ INSERT INTO Discounts (User_id, Discount_code, Discount_type, Discount_value, Pu
                 10
             )
 
-SELECT * FROM Discounts
-DELETE FROM Discounts WHERE User_id = 5
+SELECT * FROM Socketio
+DELETE FROM Purchase_log WHERE Purchase_log_id  > 5
+SHOW TABLES
 
 CREATE TABLE Discoints VALUES(
     
@@ -24,7 +25,7 @@ SELECT * FROM Orders
 DESCRIBE Orders
 SELECT Socket_id FROM Socketio WHERE User_id = 12
 
-UPDATE Orders SET Order_status = 'pending' WHERE Store_id = 1 AND Order_id = 759
+UPDATE Orders SET Order_status = 'failed' WHERE Store_id = 1 AND Order_id > 785
 SELECT * 
     FROM Discounts 
     INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id 
@@ -79,7 +80,7 @@ ALTER TABLE Store_favorite
 ADD COLUMN Favorite BOOL DEFAULT 0;
 
 
-SELECT * FROM Discounts
+SELECT * FROM Purchase_log
 
 DELETE FROM Orders WHERE User_id = 12
 
@@ -100,3 +101,5 @@ CREATE TABLE Payments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+SELECT * FROM Menu
+SELECT * FROM Food

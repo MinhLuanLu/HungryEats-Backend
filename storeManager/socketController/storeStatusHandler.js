@@ -15,13 +15,14 @@ async function StoreStatusHandler(data, socket ,io){
         status = 0
     }
     console.log(status)
+    console.log(data)
     try{
         await Make_Query(`UPDATE Stores SET Active = ${status} WHERE Store_id = ${store.Store_id}`)
         
-        const get_all_store = await Make_Query(`SELECT * FROM Stores`);
+        const [getStore] = await Make_Query(`SELECT * FROM Stores WHERE Store_id = ${store.Store_id}`);
         
         // send  a list of update stores status to all user
-        io.emit(socketConfig.updateStoreState, get_all_store);
+        io.emit(socketConfig.updateStoreState, getStore);
 
         log.debug({
             message: "Update store state successfully.",

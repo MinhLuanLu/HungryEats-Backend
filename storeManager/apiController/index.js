@@ -1,5 +1,5 @@
 import GetTodayOrder from "./getTodayOrder.js";
-import {CreateDiscount, GetDiscounts} from "./discount.js";
+import {CreateDiscount, GetDiscounts, UpdateDiscount, DeleteDiscount} from "./discount.js";
 import { RecivedOrders } from "./orders.js";
 import MenuFood from "./menuFood.js";
 
@@ -8,7 +8,9 @@ const storeController = {
     CreateDiscount,
     GetDiscounts,
     RecivedOrders,
-    MenuFood
+    MenuFood,
+    UpdateDiscount,
+    DeleteDiscount
 }
 
 export default storeController;

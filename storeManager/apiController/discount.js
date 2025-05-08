@@ -2,50 +2,25 @@ import { Make_Query } from "../../database/databaseConnection.js";
 import log from "minhluanlu-color-log";
 
 async function CreateDiscount(request, response) {
-    const {Store} = request.body;
-    return
+    const {Data} = request.body;
+    log.debug("---------------- Recived create discount event ------------------")
+    console.log(Data)
+    const {
+        Discount_type,
+        Discount_value,
+        Purchase_count, 
+        Discount_code
+      } = Data
+
     try{
-        const {
-            Store_name,
-            User_id,
-            Email,
-            Discount_code,
-            Discount_type,
-            Discount_value,
-            Purchase_count,
-            Request,
-        }= request.body
-        
-        const [get_store_id] = await Make_Query(`SELECT Store_id FROM Stores WHERE User_id = ${User_id}`);
-        const Store_id = get_store_id?.Store_id
-
-        if(Request == "Create"){
-            const save_Discount = await Make_Query(
-            `INSERT INTO Discounts (Store_id, Discount_code, Discount_type, Discount_value, Purchase_count )
-            VALUES(
-                ${Number(Store_id)},
-                '${Discount_code}',
-                '${Discount_type}',
-                ${Number(Discount_value)},
-                ${Number(Purchase_count)}
-            )`)
-            response.status(200).send({
-                success: true,
-                message: `Create Discount setting from ${Store_name} successfully..`
-            })
-        }
-
-        if(Request == "Update"){
-            
-            response.status(200).send({
-                success: true,
-                message: `Update new Discount setting from ${Store_name} successfully..`
-            })
-        }
+        await Make_Query(``)
     }
     catch(error){
-        console.info(error)
+        log.err({
+            
+        })
     }
+    
 }
 
 
@@ -57,12 +32,12 @@ async function GetDiscounts(req, res) {
     if(getDiscount.length == 0){
         log.warn({
             message: "No discounts was found with store",
-            storeId: storeID
+            storeId: id
         });
         res.status(400).json({
             success: false,
             message: "No discounts was found with store",
-            storeId: storeID
+            storeId: id
         });
         return
     }
@@ -81,4 +56,90 @@ async function GetDiscounts(req, res) {
 
 }
 
-export { CreateDiscount, GetDiscounts}
+
+async function UpdateDiscount(req, res) {
+    const {Data} = req.body;
+    log.debug("------------- Recived update discount event ---------------------");
+    const {
+        Discounts_id,
+        Store_id,
+        Discount_code,
+        Discount_type,
+        Discount_value,
+        Purchase_count
+      } = Data;
+
+    try{
+        await Make_Query(`UPDATE Discounts SET Discount_code = '${Discount_code}', Discount_type = '${Discount_type}', Discount_value = ${Discount_value}, Purchase_count = ${Purchase_count}  WHERE Store_id = ${Store_id} AND Discounts_id = ${Discounts_id}`);
+        const getDiscount = await Make_Query(`SELECT * FROM Discount WHERE Store_id = ${Store_id} AND Discounts_id = ${Discounts_id} `)
+        log.debug({
+            success: true,
+            message: "update discount successfully.",
+            data: getDiscount
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "update discount successfully.",
+            data: getDiscount
+        });
+        return
+    }
+    catch(error){
+        log.debug({
+            success: false,
+            message: "failed update discounts.",
+            data: []
+        });
+
+        res.status(400).json({
+            success: false,
+            message: "failed update discounts.",
+            data: []
+        });
+        return
+    }
+}
+
+
+async function DeleteDiscount(req, res) {
+    const {id} = req.params
+    log.debug("------------- Recived delete discount event ---------------------");
+    
+    try{
+        await Make_Query(`DELETE FROM Discounts WHERE Discounts_id = ${id}`);
+
+        log.debug({
+            success: true,
+            message: "Delete discount successfully.",
+            data: id
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Delete discount successfully.",
+            data: id
+        });
+        return
+    }
+    catch(error){
+        log.err({
+            success: false,
+            message: "Failed to delete discount.",
+            data: id
+        });
+
+        res.status(400).json({
+            success: false,
+            message: "Failed to delete discount.",
+            data: id
+        });
+    }
+}
+
+export { 
+    CreateDiscount, 
+    GetDiscounts,
+    UpdateDiscount,
+    DeleteDiscount
+}

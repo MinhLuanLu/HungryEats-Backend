@@ -21,7 +21,7 @@ SELECT * from Stores
 DELETE FROM Orders WHERE Store_id = 1
 SELECT EXISTS (SELECT 1 FROM Users WHERE User_id = 12 AND Username = "minhlu142");
 
-SELECT * FROM Orders
+SELECT * FROM discounts
 DESCRIBE Orders
 SELECT Socket_id FROM Socketio WHERE User_id = 12
 
@@ -42,7 +42,7 @@ SELECT * FROM purchase_log
 
 SHOW TABLES
 
-SELECT *
+SELECT * FROM discounts
 FROM Orders 
 INNER JOIN Users ON Orders.User_id = Users.User_id
 WHERE Orders.store_id = 1 AND Orders.Order_status = 'pending';

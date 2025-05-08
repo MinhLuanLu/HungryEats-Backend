@@ -5,10 +5,14 @@ const router = express.Router();
 
 router.get('/v1/store/orders/:id', storeController.RecivedOrders);
 router.get('/v1/store/menufood/:id', storeController.MenuFood);
-router.get('/v1/store/discounts/:id', storeController.GetDiscounts);
 
+//////////////////////////////////////////////////
+router.get('/v1/store/discounts/:id', storeController.GetDiscounts);
+router.post('/v1/store/discounts', storeController.CreateDiscount);
+router.patch('/v1/store/discounts', storeController.UpdateDiscount);
+router.delete('/v1/store/discounts/:id', storeController.DeleteDiscount)
 /////////////////////////////////////////////
-router.post('/v1/discounts', storeController.CreateDiscount)
+
 
 router.post('/get_today_order/api', storeController.GetTodayOrder);
 

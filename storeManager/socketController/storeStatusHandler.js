@@ -8,6 +8,7 @@ async function StoreStatusHandler(data, socket ,io){
     const state = data.State;
     let status;
     
+    
     log.debug("-------- Recived Store status event -----------------")
 
     if(state){

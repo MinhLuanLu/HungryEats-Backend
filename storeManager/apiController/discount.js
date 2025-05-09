@@ -9,15 +9,28 @@ async function CreateDiscount(request, response) {
         Discount_type,
         Discount_value,
         Purchase_count, 
-        Discount_code
+        Discount_code,
+        Store
       } = Data
 
     try{
-        await Make_Query(``)
+        await Make_Query(`INSERT INTO Discounts (Store_id, Discount_code, Discount_type, Discount_value, Purchase_count)
+            VALUES (
+            ${Store?.Store_id}, '${Discount_code}', '${Discount_type}', '${Discount_value}', ${Purchase_count}
+            )    
+        `);
+
+        const getDiscount = await Make_Query(`SELECT * FROM Discounts WHERE Store_id = ${Store.Store_id}`)
+
+        log.debug({
+            success: true,
+            message:"create discount successfully.",
+            data: getDiscount
+        })
     }
     catch(error){
         log.err({
-            
+            error: error
         })
     }
     
@@ -71,7 +84,7 @@ async function UpdateDiscount(req, res) {
 
     try{
         await Make_Query(`UPDATE Discounts SET Discount_code = '${Discount_code}', Discount_type = '${Discount_type}', Discount_value = ${Discount_value}, Purchase_count = ${Purchase_count}  WHERE Store_id = ${Store_id} AND Discounts_id = ${Discounts_id}`);
-        const getDiscount = await Make_Query(`SELECT * FROM Discount WHERE Store_id = ${Store_id} AND Discounts_id = ${Discounts_id} `)
+        const getDiscount = await Make_Query(`SELECT * FROM Discounts WHERE Store_id = ${Store_id} AND Discounts_id = ${Discounts_id} `)
         log.debug({
             success: true,
             message: "update discount successfully.",
@@ -88,7 +101,7 @@ async function UpdateDiscount(req, res) {
     catch(error){
         log.debug({
             success: false,
-            message: "failed update discounts.",
+            message: error,
             data: []
         });
 
@@ -107,7 +120,11 @@ async function DeleteDiscount(req, res) {
     log.debug("------------- Recived delete discount event ---------------------");
     
     try{
+        const [getStore_id] = await Make_Query(`SELECT * FROM Discounts Where Discounts_id = ${id}`);
         await Make_Query(`DELETE FROM Discounts WHERE Discounts_id = ${id}`);
+
+        const Store_id = getStore_id.Store_id;
+        const getDiscounts = await Make_Query(`SELECT * FROM Discounts Where Store_id = ${Store_id}`)
 
         log.debug({
             success: true,
@@ -118,14 +135,14 @@ async function DeleteDiscount(req, res) {
         res.status(200).json({
             success: true,
             message: "Delete discount successfully.",
-            data: id
+            data: getDiscounts
         });
         return
     }
     catch(error){
         log.err({
             success: false,
-            message: "Failed to delete discount.",
+            message: error,
             data: id
         });
 

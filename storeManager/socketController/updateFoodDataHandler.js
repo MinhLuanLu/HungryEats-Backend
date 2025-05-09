@@ -1,6 +1,6 @@
 import { Make_Query } from "../../database/databaseConnection.js";
 import log from "minhluanlu-color-log";
-
+import { socketConfig } from "../../config.js";
 
 
 async function updateFoodDataHandler(data, socket, io){
@@ -21,6 +21,7 @@ async function updateFoodDataHandler(data, socket, io){
     }
         
     /// send new data to all user //
+    io.emit(socketConfig.updateFoodData, getFood)
 }
 
 export default updateFoodDataHandler;

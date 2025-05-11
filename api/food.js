@@ -1,4 +1,6 @@
 import { Make_Query } from "../database/databaseConnection.js";
+import fs from 'fs';
+import path from 'path';
 import log from 'minhluanlu-color-log';
 
 async function FoodList(request, response){
@@ -58,7 +60,7 @@ async function FoodList(request, response){
     }
 }
 
-export async function updateFoodQuantity(foods){
+async function updateFoodQuantity(foods){
     let success = false;
     let Food = [];
     try{
@@ -101,4 +103,32 @@ export async function updateFoodQuantity(foods){
     }
 }
 
-export default FoodList;
+async function uploadFoodImage(request, response) {
+    const file = request.file
+    const file_name = File["originalname"]
+    let {Food} = request.body;
+    Food = JSON.parse(Food);
+    
+
+    const filePath = path.resolve(file.path); // get absolute path
+    const base64Image = fs.readFileSync(filePath, { encoding: 'base64' });
+
+    const completeBase64Code = `data:${file.mimetype};base64,${base64Image}`
+
+    try{
+        const updateFoodIamge = await Make_Query(`UPDATE Food SET Food_image = '${completeBase64Code}' WHERE Food_id = ${Food.Food_id}`)
+
+        const getFood = await Make_Query(`SELECT * FROM Food WHERE Food_id = ${Food.Food_id}`);
+        console.log(getFood);
+
+        response.status(200).json({
+            success: true,
+            message: "save image successfully.",
+            data: completeBase64Code
+        });
+    }
+    catch(error){
+        log.err(error)
+    }
+}
+export { FoodList, updateFoodQuantity, uploadFoodImage};

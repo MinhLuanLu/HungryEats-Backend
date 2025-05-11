@@ -24,6 +24,9 @@ SELECT EXISTS (SELECT 1 FROM Users WHERE User_id = 12 AND Username = "minhlu142"
 SELECT * FROM discounts
 DESCRIBE Orders
 SELECT Socket_id FROM Socketio WHERE User_id = 12
+ALTER TABLE Food
+MODIFY COLUMN Food_image LONGTEXT;
+
 
 UPDATE Orders SET Order_status = 'failed' WHERE Store_id = 1 AND Order_id > 785
 SELECT * 

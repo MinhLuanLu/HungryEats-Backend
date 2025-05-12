@@ -7,7 +7,7 @@ INSERT INTO Discounts (User_id, Discount_code, Discount_type, Discount_value, Pu
                 10
             )
 
-SELECT * FROM Socketio
+SELECT * FROM Purchase_log
 DELETE FROM Purchase_log WHERE Purchase_log_id  > 5
 SHOW TABLES
 
@@ -85,7 +85,7 @@ ADD COLUMN Favorite BOOL DEFAULT 0;
 
 SELECT * FROM Purchase_log
 
-DELETE FROM Orders WHERE User_id = 12
+DELETE FROM Purchase_log WHERE Purchase_log_id > 2
 
 ALTER TABLE Payments
 ADD COLUMN Payment_intents VARCHAR(255)

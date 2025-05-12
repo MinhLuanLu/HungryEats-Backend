@@ -4,7 +4,7 @@ import config from '../config.js';
 import multer from "multer";
 import fs from 'fs';
 import path from 'path';
-import log from 'minhluanlu-color-log'
+import log from 'minhluanlu-color-log';
 
 import sharedRoutes from '../routers/sharedRoutes/sharedRoutes.js'
 import userRoutes from '../routers/userRoutes/userRoutes.js';
@@ -29,9 +29,10 @@ async function API() {
     const upload = multer({ storage: storage })
 
     const api_express = express() // Create A Server
-    api_express.use(json())
+    api_express.use(json({ limit: '10mb' }))
     api_express.use(cors())
     api_express.use(express.static('upload/images')); 
+    api_express.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
     const PORT = config.API_PORT;
     api_express.use(cors())

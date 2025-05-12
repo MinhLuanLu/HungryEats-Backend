@@ -16,13 +16,84 @@ async function CreatePurchaseLog(order) {
           `);
           
           const result = check_log[0]?.exists_flag ?? 0;
-          const exist = result === 1;
+          exist = result === 1;
           
        
         /// Purchase log not exists yet create one ///
         if(!exist){
-            console.log('------------ Purchase log not exist yet, create one --------------------')
-            log.info(`Create new purchase log with User_id:${User_id} and Store_id:${Store_id}`);
+            log.debug('------------ Purchase log not exist yet, create one --------------------')
+            try{
+                await Make_Query(
+                    `INSERT INTO Purchase_log (User_id , Store_id, Purchase_count, Type, Status) VALUES(
+                        ${User_id},
+                        ${Store_id},
+                        ${1},
+                        'none',
+                        '${purchaseLog.available}'
+
+                    )`);
+                log.debug("Create purchase log successfully.")
+                return{
+                    success: true,
+                    message: `Create Purchase Log for User_id:${User_id} with Store_id: ${Store_id}`,
+                    data: 
+                    {
+                        Purchase_count: 1
+                    }
+                }
+            }catch(error){
+                log.warn(error);
+                return []
+            }
+        }
+
+        if(exist){
+            console.log('------------- Purchase log exist already, update it ------------------------')
+            log.debug({
+                message: `Update purchase log`,
+                User: User_id,
+                Store: Store_id
+            });
+
+            let purchase_log = undefined
+
+            const getPurchaseLog = await Make_Query(`SELECT * FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
+
+            for(const item of getPurchaseLog){
+                const purchase_log_status = item.Status;
+                if(purchase_log_status != purchaseLog.redeemed){
+                    purchase_log = item
+                }
+
+            }
+            
+
+            if(purchase_log != undefined){
+                log.debug("---------- update purchase log --------");
+                try{
+                    const [current_purchase_count] = await Make_Query(`SELECT Purchase_count FROM Purchase_log WHERE Purchase_log_id = ${purchase_log?.Purchase_log_id}`);
+                    const new_purchase_count = current_purchase_count?.Purchase_count + 1; // update to 1
+                    
+                    await Make_Query(`UPDATE Purchase_log SET Purchase_count = ${new_purchase_count} WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
+                    return{
+                        success: true,
+                        message: `Update Purchase Log for User_id: ${User_id} with Store_id: ${Store_id}`,
+                        data: 
+                        {
+                            Purchase_count: new_purchase_count
+                        }
+                    }
+                }catch(error){
+                    log.warn(error);
+                    return []
+                }
+            }
+
+            log.debug({
+                message: "All purchase status are redeemed, create a new one.",
+                data: getPurchaseLog
+            });
+
             try{
                 await Make_Query(
                     `INSERT INTO Purchase_log (User_id , Store_id, Purchase_count, Type, Status) VALUES(
@@ -45,62 +116,7 @@ async function CreatePurchaseLog(order) {
                 log.warn(error);
                 return []
             }
-        }
 
-        if(exist){
-            console.log('------------- Purchase log exist already, update it ------------------------')
-            console.log(`Update purchase log with User_id: ${User_id} and Store_id: ${Store_id}`);
-
-            //if exist and the staust is assigned then crate a new one//
-            const [getPurchaseLog] = await Make_Query(`SELECT Status FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
-            if(getPurchaseLog.Status === purchaseLog.redeemed){
-                // create a new one //////////////////////////////////////////   
-                log.debug({
-                    message: "purchaseLog fwas found is User_id, create one",
-                    purchaseLog: getPurchaseLog
-                });
-                try{
-                    await Make_Query(
-                        `INSERT INTO Purchase_log (User_id , Store_id, Purchase_count, Type, Status) VALUES(
-                            ${User_id},
-                            ${Store_id},
-                            ${1},
-                            'none',
-                            '${purchaseLog.available}'
-    
-                        )`);
-                    return{
-                        success: true,
-                        message: `Create Purchase Log for User_id:${User_id} with Store_id: ${Store_id}`,
-                        data: 
-                        {
-                            Purchase_count: 1
-                        }
-                    }
-                }catch(error){
-                    log.warn(error);
-                    return []
-                }
-            }
-            else{
-                try{
-                    const [current_purchase_count] = await Make_Query(`SELECT Purchase_count FROM Purchase_log WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
-                    const new_purchase_count = current_purchase_count?.Purchase_count + 1; // update to 1
-                    
-                    await Make_Query(`UPDATE Purchase_log SET Purchase_count = ${new_purchase_count} WHERE User_id = ${User_id} AND Store_id = ${Store_id}`);
-                    return{
-                        success: true,
-                        message: `Update Purchase Log for User_id: ${User_id} with Store_id: ${Store_id}`,
-                        data: 
-                        {
-                            Purchase_count: new_purchase_count
-                        }
-                    }
-                }catch(error){
-                    log.warn(error);
-                    return []
-                }
-            }
         }
     }
     catch(error){

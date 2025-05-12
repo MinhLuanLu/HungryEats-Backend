@@ -157,9 +157,13 @@ async function newOrderHandler(order, socket, io) {
                         log.warn({message: 'failed to update food quantity.'})
                     }
                     log.debug(updateFood)
-
+                    
                     // update the purchaerlog status to redemed if order using discount //
                     if(order.Discount != undefined){
+                        log.debug({
+                            message: "Order used discount code, update purcahse log",
+                            Discount: order.Discount
+                        })
                         const updateStatus = await updatePurchaseLogStatus(order.User, order.Store, purchaseLog.redeemed);
                         updateStatus ? log.debug('update purchaselog successfully') : log.warn('failed to update purchase log')
                     }
@@ -198,6 +202,10 @@ async function newOrderHandler(order, socket, io) {
   
             // update the purchaerlog status to redemed if order using discount //
             if(order.Discount != undefined){
+                log.debug({
+                    message: "Order used discount code, update purcahse log",
+                    Discount: order.Discount
+                });
                 const updateStatus = await updatePurchaseLogStatus(order.User, order.Store, purchaseLog.redeemed);
                 updateStatus ? log.debug('update purchaselog successfully') : log.warn('failed to update purchase log')
             }

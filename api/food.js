@@ -118,17 +118,20 @@ async function uploadFoodImage(request, response) {
     try{
         const updateFoodIamge = await Make_Query(`UPDATE Food SET Food_image = '${completeBase64Code}' WHERE Food_id = ${Food.Food_id}`)
 
-        const getFood = await Make_Query(`SELECT * FROM Food WHERE Food_id = ${Food.Food_id}`);
-        console.log(getFood);
+        const [getFood] = await Make_Query(`SELECT * FROM Food WHERE Food_id = ${Food.Food_id}`);
+        //console.log(getFood);
 
         response.status(200).json({
             success: true,
             message: "save image successfully.",
-            data: completeBase64Code
+            data: getFood
         });
     }
     catch(error){
-        log.err(error)
+        response.status(400).json({
+            success: true,
+            message: "Failed to save image successfully.",
+        });
     }
 }
 export { FoodList, updateFoodQuantity, uploadFoodImage};

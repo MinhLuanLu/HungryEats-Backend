@@ -33,7 +33,8 @@ router.post('/menu/api', ApiShared.Menu);
 router.post('/drink/api', ApiShared.Drink);
 router.post('/payment/api', ApiShared.newPayment);
 
-router.post("/v1/store/upload/food/image", upload.single('image'), ApiShared.uploadFoodImage)
+router.post("/v1/store/upload/food/image", upload.single('image'), ApiShared.uploadFoodImage);
+router.post("/v1/store/create/food", ApiShared.createFood);
 
 
 export default router;

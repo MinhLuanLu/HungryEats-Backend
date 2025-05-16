@@ -21,15 +21,14 @@ SELECT * from Stores
 DELETE FROM Orders WHERE Store_id = 1
 SELECT EXISTS (SELECT 1 FROM Users WHERE User_id = 12 AND Username = "minhlu142");
 
-SELECT * FROM discounts
+SELECT * FROM food
 DESCRIBE Orders
 SELECT Socket_id FROM Socketio WHERE User_id = 12
 ALTER TABLE Food
 MODIFY COLUMN Food_image LONGTEXT;
 
 
-UPDATE Orders SET Order_status = 'failed' WHERE Store_id = 1 AND Order_id > 785
-SELECT * 
+UPDATE Orders SET Order_status = 'pending' WHERE Order_id = 872
     FROM Discounts 
     INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id 
     WHERE Discounts.Store_id = 1
@@ -45,7 +44,7 @@ SELECT * FROM purchase_log
 
 SHOW TABLES
 
-SELECT * FROM discounts
+SELECT * FROM Purchase_log
 FROM Orders 
 INNER JOIN Users ON Orders.User_id = Users.User_id
 WHERE Orders.store_id = 1 AND Orders.Order_status = 'pending';
@@ -55,7 +54,7 @@ WHERE Orders.store_id = 1 AND Orders.Order_status = 'pending';
 DESCRIBE Orders
 SELECT * FROM Orders WHERE Order_number = d7561e24-d7a5-4924-96a2-ab957d639063
 
-DELETE FROM Discounts WHERE Discounts_id = 3
+DELETE FROM Orders WHERE Order_id  != 759
 
 ALTER TABLE Orders MODIFY COLUMN Food_item JSON;
 ALTER TABLE Orders MODIFY COLUMN Drink_item JSON;
@@ -85,7 +84,7 @@ ADD COLUMN Favorite BOOL DEFAULT 0;
 
 SELECT * FROM Purchase_log
 
-DELETE FROM Purchase_log WHERE Purchase_log_id > 2
+DELETE FROM Purchase_log WHERE Purchase_log_id = 77
 
 ALTER TABLE Payments
 ADD COLUMN Payment_intents VARCHAR(255)

@@ -108,6 +108,8 @@ async function uploadFoodImage(request, response) {
     const file_name = File["originalname"]
     let {Food} = request.body;
     Food = JSON.parse(Food);
+
+    log.debug("------------------ Recived upload food image event ------------------")
     
 
     const filePath = path.resolve(file.path); // get absolute path
@@ -134,4 +136,34 @@ async function uploadFoodImage(request, response) {
         });
     }
 }
-export { FoodList, updateFoodQuantity, uploadFoodImage};
+
+async function createFood(req, res) {
+    const {
+        Menu_name,
+        Food_name,
+        Food_description,
+        Price,
+        Quantity
+    } = req.body;
+    
+    log.debug("---------------- Recived create food event ------------------");
+
+    try{
+        const createFood = await Make_Query(``)
+    }
+    catch(error){
+        log.err({
+            success: false,
+            message: error,
+            data:[]
+        });
+        res.status(400).json({
+            success: false,
+            message: error,
+            data:[]
+        })
+    }
+}
+
+
+export { FoodList, updateFoodQuantity, uploadFoodImage, createFood};

@@ -28,13 +28,22 @@ router.get('/payments/refund/:id', ApiShared.refundPaymentHandler)
 /////////////////////////////////////////////////////
 router.post('/register/api', ApiShared.Register);
 router.post('/login/api', ApiShared.Login); 
-router.post('/foodList/api', ApiShared.FoodList);
-router.post('/menu/api', ApiShared.Menu);
 router.post('/drink/api', ApiShared.Drink);
 router.post('/payment/api', ApiShared.newPayment);
 
-router.post("/v1/store/upload/food/image", upload.single('image'), ApiShared.uploadFoodImage);
-router.post("/v1/store/create/food", ApiShared.createFood);
+////////////////////////////////////////////////////
+router.post('/foodList/api', ApiShared.FoodList);
+router.patch("/v1/store/upload/food/image", upload.single('image'), ApiShared.uploadFoodImage);
+router.post("/v1/food",upload.single('image') , ApiShared.createFood);
+router.delete("/v1/food/:id", ApiShared.deleteFood);
+//////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////
+router.post('/menu/api', ApiShared.Menu);
+router.patch('/v1/menu',upload.single('image') ,ApiShared.updateMenu)
+
+/////////////////////////////////////////////////////
 
 
 export default router;

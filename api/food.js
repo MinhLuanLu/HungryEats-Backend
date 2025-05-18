@@ -60,6 +60,7 @@ async function FoodList(request, response){
     }
 }
 
+// this function using in socketIO not API //
 async function updateFoodQuantity(foods){
     let success = false;
     let Food = [];
@@ -138,32 +139,213 @@ async function uploadFoodImage(request, response) {
 }
 
 async function createFood(req, res) {
+    const Imagefile = req.file
+    let {Food} = req.body;
+    Food = JSON.parse(Food)
     const {
         Menu_name,
+        Menu_description,
         Food_name,
         Food_description,
         Price,
-        Quantity
-    } = req.body;
-    
-    log.debug("---------------- Recived create food event ------------------");
+        Quantity,
+        isNewMenu,
+        SelectMenu,
+        Store
+    } = Food;
 
-    try{
-        const createFood = await Make_Query(``)
+    log.debug({
+        message: "------------- Recived create food event ------------",
+        event: Food
+    });
+
+
+    if(isNewMenu){
+        log.debug("Create food with new menu");
+        try{
+            const createMenu = await Make_Query(`INSERT INTO Menu (Store_id, Menu_name, Menu_description, Menu_image)
+                VALUES(
+                    ${Store.Store_id},
+                    '${Menu_name}',
+                    '${Menu_description}',
+                    'none'
+                )    
+            `);
+
+            log.debug("Create Menu successfully. Add food to the menu");
+            const newMenuID = createMenu?.insertId;
+            const createFood = await Make_Query(`INSERT INTO Food (Menu_id, Food_name, Food_description, Quantity, Price, Food_image)
+            VALUES(
+                ${Number(newMenuID)},
+                '${Food_name}',
+                '${Food_description}',
+                ${Number(Quantity)},
+                ${Number(Price)},
+                'null'
+            )`);
+
+            log.debug({
+                message: "Create food successfully.",
+                data: createFood
+            });
+            
+            const createFoodID = createFood?.insertId;
+            const getFood = await Make_Query(`SELECT * FROM Food WHERE Food_id = ${createFoodID}`)
+            const retrievedMenu = await Make_Query
+            (
+                `SELECT *
+                FROM Stores INNER JOIN Menu
+                ON Stores.Store_id = Menu.Store_id  
+                WHERE Stores.Store_id = ${Store.Store_id} AND Menu.Menu_id = ${newMenuID};`
+            );
+            if(retrievedMenu.length == 0){
+                log.debug({
+                    message: 'Failed to get the menu of food just created.',
+                    data: retrievedMenu
+                });
+                res.status(400).json({
+                    success: false,
+                    message: 'Failed to get the menu of food just created.',
+                    data: retrievedMenu
+                });
+                return;
+            }
+
+            let foodDataResult = retrievedMenu[0];
+            foodDataResult.Food = getFood[0]
+            
+
+            res.status(200).json({
+                success: true,
+                message: "Create food successfully.",
+                data: []
+            })
+        }
+        catch(error){
+            log.err({
+                success: false,
+                message: error,
+                data:[]
+            });
+            res.status(400).json({
+                success: false,
+                message: error,
+                data:[]
+            })
+        }
     }
-    catch(error){
-        log.err({
-            success: false,
-            message: error,
-            data:[]
-        });
-        res.status(400).json({
-            success: false,
-            message: error,
-            data:[]
-        })
+    else{
+        log.debug("------------ Create food with select menu -----------------");
+        try{
+            const createFood = await Make_Query(`INSERT INTO Food (Menu_id, Food_name, Food_description, Quantity, Price, Food_image)
+            VALUES(
+                ${Number(SelectMenu)},
+                '${Food_name}',
+                '${Food_description}',
+                ${Number(Quantity)},
+                ${Number(Price)},
+                'null'
+            )`);
+
+            log.debug({
+                message: "Create food successfully.",
+                data: createFood
+            });
+            
+            const createFoodID = createFood?.insertId;
+            const getFood = await Make_Query(`SELECT * FROM Food WHERE Food_id = ${createFoodID}`);
+            if(getFood.length == 0){
+                log.debug({
+                    message: 'Failed to get the new food just created.',
+                    data: getFood
+                });
+                res.status(400).json({
+                    success: false,
+                    message: 'Failed to get the new food just created.',
+                    data: getFood
+                });
+                return;
+            }
+
+            const retrievedMenu = await Make_Query
+            (
+                `SELECT *
+                FROM Stores INNER JOIN Menu
+                ON Stores.Store_id = Menu.Store_id  
+                WHERE Stores.Store_id = ${Store.Store_id} AND Menu.Menu_id = ${SelectMenu};`
+            );
+            if(retrievedMenu.length == 0){
+                log.debug({
+                    message: 'Failed to get the menu of food just created.',
+                    data: retrievedMenu
+                });
+                res.status(400).json({
+                    success: false,
+                    message: 'Failed to get the menu of food just created.',
+                    data: retrievedMenu
+                });
+                return;
+            }
+
+            let foodDataResult = retrievedMenu[0];
+            foodDataResult.Food = getFood[0]
+
+            res.status(200).json({
+                success: true,
+                message: "Create food successfully.",
+                data: foodDataResult
+            });
+        }
+        catch(error){
+            log.err({
+                success: false,
+                message: error,
+                data:[]
+            });
+            res.status(400).json({
+                success: false,
+                message: error,
+                data:[]
+            })
+        }
     }
 }
 
 
-export { FoodList, updateFoodQuantity, uploadFoodImage, createFood};
+async function deleteFood(req, res) {
+    const FoodID = req.params.id
+    log.debug({
+        message: 'Recived Delete Food event',
+        FoodID: FoodID
+    });
+
+    try{
+        const deleteFood = await Make_Query(`
+            DELETE FROM Food WHERE Food_id = ${FoodID}
+        `);
+
+        log.debug({
+            message: "Delete food successfully.",
+            DeleteID: FoodID,
+            data: deleteFood
+        });
+        res.status(200).json({
+            success:true,
+            message: "Delete food successfully.",
+            DeleteID: FoodID,
+            data: deleteFood
+        })
+    }
+    catch(error){
+        log.debug({
+            message: "error to delete food"
+        });
+        res.status(400).json({
+            message: "error to delete food"
+        })
+    }
+
+
+}
+
+export { FoodList, updateFoodQuantity, uploadFoodImage, createFood, deleteFood};

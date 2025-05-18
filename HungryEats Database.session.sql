@@ -44,7 +44,7 @@ SELECT * FROM purchase_log
 
 SHOW TABLES
 
-SELECT * FROM Purchase_log
+SELECT * FROM Food
 FROM Orders 
 INNER JOIN Users ON Orders.User_id = Users.User_id
 WHERE Orders.store_id = 1 AND Orders.Order_status = 'pending';
@@ -54,7 +54,7 @@ WHERE Orders.store_id = 1 AND Orders.Order_status = 'pending';
 DESCRIBE Orders
 SELECT * FROM Orders WHERE Order_number = d7561e24-d7a5-4924-96a2-ab957d639063
 
-DELETE FROM Orders WHERE Order_id  != 759
+DELETE FROM Food WHERE Food_id  = 19
 
 ALTER TABLE Orders MODIFY COLUMN Food_item JSON;
 ALTER TABLE Orders MODIFY COLUMN Drink_item JSON;

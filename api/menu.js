@@ -55,6 +55,69 @@ async function Menu(request, response) {
             message: error,
         }
     }
+};
+
+
+async function updateMenu(req, res) {
+    let Imagefile = req.file
+    let {Menu} = req.body;
+    Menu = JSON.parse(Menu);
+    let completeBase64Code;
+
+    log.debug({
+        message: "Recived update menu event",
+        event: Menu.Menu_name
+    });
+
+    if(Imagefile != undefined){
+        log.debug("Convert image to base64.");
+        const filePath = path.resolve(file.path); // get absolute path
+        const base64Image = fs.readFileSync(filePath, { encoding: 'base64' });
+        completeBase64Code = `data:${file.mimetype};base64,${base64Image}`
+    }
+    else{
+        completeBase64Code = "none"
+    }
+    
+    try{
+
+        const updateMenu = await Make_Query(`UPDATE Menu SET 
+            Store_id = ${Menu.Store_id},
+            Menu_name = '${Menu.Menu_name}',
+            Menu_description = '${Menu.Menu_description}',
+            Menu_image = '${completeBase64Code}' WHERE Menu_id = ${Menu.Menu_id}
+        `);
+
+        const [getMenu] = await Make_Query(`SELECT * FROM Menu WHERE Menu_id = ${Menu.Menu_id}`)
+
+        log.debug({
+            message:"update menu successfully",
+            data: updateMenu
+        });
+
+        res.status(200).json({
+            success:true,
+            message:"update menu successfully",
+            data: getMenu
+        })
+
+    }
+    catch(error){
+        console.log(error)
+        log.debug({
+            message: "Failed to update menu",
+            error: error
+        });
+        res.status(400).json({
+            success: false,
+            message: "Failed to update menu",
+            error: error
+        })
+    }
+    
 }
 
-export default Menu;
+export{
+    Menu,
+    updateMenu
+}

@@ -159,6 +159,11 @@ async function createFood(req, res) {
         event: Food
     });
 
+     const filePath = path.resolve(Imagefile.path); // get absolute path
+    const base64Image = fs.readFileSync(filePath, { encoding: 'base64' });
+
+    const completeBase64Code = `data:${Imagefile.mimetype};base64,${base64Image}`
+
 
     if(isNewMenu){
         log.debug("Create food with new menu");
@@ -181,7 +186,7 @@ async function createFood(req, res) {
                 '${Food_description}',
                 ${Number(Quantity)},
                 ${Number(Price)},
-                'null'
+                '${completeBase64Code}'
             )`);
 
             log.debug({
@@ -244,7 +249,7 @@ async function createFood(req, res) {
                 '${Food_description}',
                 ${Number(Quantity)},
                 ${Number(Price)},
-                'null'
+                '${completeBase64Code}'
             )`);
 
             log.debug({

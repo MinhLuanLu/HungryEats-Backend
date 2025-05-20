@@ -14,7 +14,7 @@ async function StoreSocketHandler(socket, io) {
 
     // =============== Handle order action (Accept or Decline) ========================== //
     socket.on(socketConfig.orderAction, async(order) =>{
-        orderAction(order, socket, io)
+        orderAction(order, socket, io);
     })
     // ================================================================================= //
 
@@ -23,13 +23,7 @@ async function StoreSocketHandler(socket, io) {
     socket.on(socketConfig.updateFoodData, async(data) =>{
         updateFoodDataHandler(data, socket, io)
     })
-    // =========================================================================== //
-
-    // ============ Handle the comfirmation when store received the order from users ============== //
-    socket.on('update_food_quantity', async(data)=>{
-        const update_food_quantity = await UpdateFoodQuantityHandler(socket, io, data);
-        console.info(update_food_quantity)
-    })
+    // ==============================================================================//
     
 }
 

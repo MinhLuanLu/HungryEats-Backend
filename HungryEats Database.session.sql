@@ -21,14 +21,14 @@ SELECT * from Stores
 DELETE FROM Orders WHERE Store_id = 1
 SELECT EXISTS (SELECT 1 FROM Users WHERE User_id = 12 AND Username = "minhlu142");
 
-SELECT * FROM food
+SELECT * FROM Orders
 DESCRIBE Orders
 SELECT Socket_id FROM Socketio WHERE User_id = 12
 ALTER TABLE Food
 MODIFY COLUMN Food_image LONGTEXT;
 
 
-UPDATE Orders SET Order_status = 'pending' WHERE Order_id = 872
+UPDATE Orders SET Order_status = 'pending' WHERE Order_id  > 872
     FROM Discounts 
     INNER JOIN Stores ON Discounts.Store_id = Stores.Store_id 
     WHERE Discounts.Store_id = 1

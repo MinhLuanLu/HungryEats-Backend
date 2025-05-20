@@ -1,7 +1,6 @@
 import { Make_Query } from '../../database/databaseConnection.js';
 import StoreStatusHandler from './storeStatusHandler.js';
 import orderAction from './orderAction.js';
-import UpdateFoodQuantityHandler from './updateFoodQuantityHandler.js';
 import { socketConfig } from '../../config.js';
 import updateFoodDataHandler from './updateFoodDataHandler.js';
 

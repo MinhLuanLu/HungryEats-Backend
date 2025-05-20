@@ -13,8 +13,8 @@ async function orderAction(order, socket, io) {
         if(orderStatus != orderStatusConfig.done){
             const [getUserSocketID] = await Make_Query(`SELECT * FROM Socketio WHERE User_id = ${order.User_id}`)
             const socketID = getUserSocketID?.Socket_id;
-            console.log('send new order status')
-            io.to(socketID).emit(socketConfig.updateOrderStatus, order)
+            console.log('send new order status', socketID);
+            socket.to(socketID).emit(socketConfig.updateOrderStatus, order)
         }
         
         return{

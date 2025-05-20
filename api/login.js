@@ -67,7 +67,7 @@ async function Login(request, response) {
         }
     }
     catch(error){
-        log.error(error)
+        log.err(error)
         return{
             success: false,
             message: error

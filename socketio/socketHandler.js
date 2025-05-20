@@ -25,61 +25,56 @@ export function socketConnection(api_express) {
         console.info(`Socket [${socket.id}] connected`);
 
         socket.on('connection', async (data)=>{
-        const Socket_id             = data?.Socket_id
-        const User_id               = data?.User?.User_id
-        const Store_name            = data?.User?.Store_name
-        const Email                 = data?.User?.Email
-        const Username              = data?.User?.Username
+        const SocketID            = data?.Socket_id
+        const User = data?.User;
+        console.log(User)
 
-        //console.log(data.User)
-    
-        if(Store_name && User_id){
-            console.info(`Store ${Store_name} is opening..`)
+        const check = await Make_Query(`SELECT * FROM Socketio WHERE User_id = ${User.User_id}`);
+        if(check.length > 0){
             try{
-                const save_socket_id = await Make_Query(`INSERT INTO Socketio (User_id, Socket_id) VALUES (${Number(User_id)}, '${Socket_id}'); `);
-                const update_store_status = await Make_Query(`UPDATE Stores SET Active = 1 WHERE User_id = ${Number(User_id)}`)
-
-                const get_all_stores_status = await Make_Query('SELECT * FROM Stores')
-
-                const [get_store_status] = await Make_Query(`SELECT Status FROM Stores WHERE User_id = ${Number(User_id)}`)
-                socket.emit('update_Store_status', get_store_status)
-
-                // Handle update all stores status live
-                io.emit('store_list', get_all_stores_status)
-                console.debug(`Could not save socket ID <${Socket_id}> to the Database`);
+                log.debug({
+                    message: "data is exist, save socket to it",
+                    socketId: SocketID,
+                    data: check
+                })
+                await Make_Query(`UPDATE Socketio SET Socket_id = '${String(SocketID)}' WHERE id = ${check[0].id}`);
+                return
             }
-            catch{
-                const save_socket_id = await Make_Query(`UPDATE Socketio SET Socket_id = '${Socket_id}' WHERE User_id = ${Number(User_id)};`)
-                const update_store_status = await Make_Query(`UPDATE Stores SET Active = 1 WHERE User_id = ${Number(User_id)}`)
-                const [get_store_status] = await Make_Query(`SELECT Status FROM Stores WHERE User_id = ${Number(User_id)}`)
-
-                const get_all_stores_status = await Make_Query('SELECT * FROM Stores')
-
-                socket.emit('update_Store_status', get_store_status)
-                
-                // Handle update all stores status live
-                io.emit('updateStoreStatus', get_all_stores_status)
-                console.info('Socket ID updated successfully...');
+            catch(error){
+                log.err({
+                    message: "Failed to update socketID",
+                    socketID: SocketID,
+                    error: error
+                });
             }
         }
 
-        if(Email && Username && Socket_id){
-            console.info(`Socket ID <${Socket_id}> connection established from mobile app.`);
-                
-            const [get_user_id] = await Make_Query(`SELECT User_id FROM Users WHERE Email = '${Email}' AND Username = '${Username}'`);
-            let user_id = get_user_id["User_id"]
-            if(user_id){
-                try{ 
-                    const save_socket_id = await Make_Query(`INSERT INTO Socketio(User_id, Socket_id) VALUES (${Number(user_id)}, '${Socket_id}')`)
-                    console.log(`Socket_id from ${Email} has created..`)
-                }
-                catch{
-                    const save_socket_id = await Make_Query(`UPDATE Socketio SET Socket_id = '${Socket_id}' WHERE User_id = ${Number(user_id)}`)
-                    console.log(`Socket_id from ${Email} has updated..`)
-                }
-            }
+        // if socket data not exist yet //
+        log.debug({
+            message:"cerate socket id",
+            socketID: SocketID,
+            user: User
+        });
+
+        try{
+            const create = await Make_Query(`INSERT INTO Socketio (User_id, Socket_id)
+            VALUES(
+                ${User?.User_id},
+                '${SocketID}'
+            )    
+            `);
+            log.debug("create successfully.")
         }
-       });
+        catch(error){
+            log.err({
+                message: "failed to create and save socketid",
+                user: User,
+                socketID: SocketID
+            })
+        }
+
+  
+    });
 
 
         // Handle Disconnect to socket
